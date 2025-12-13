@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* Custom print styles for clean PDF output */
+@media print {
+    /* Hide all control and navigation elements */
+    .print\:hidden {
+        display: none !important;
+    }
+
+    /* Ensure the document uses the full page width and height */
+    body, #root {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Remove screen-based styles (shadows, heavy borders) for printing */
+    .shadow-2xl, .shadow-lg, .shadow-md, .border, .rounded-xl, .rounded-lg, .rounded-md {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+    }
+
+    /* Override dynamic background/text colors for high contrast print */
+    .bg-white, .bg-gray-100, .bg-gray-50, .bg-indigo-50 {
+        background-color: white !important;
+    }
+    .text-gray-800, .text-gray-700, .text-gray-600 {
+        color: #000 !important;
+    }
+    .text-indigo-700, .text-indigo-800 {
+        color: #1f2937 !important; /* Dark Gray for print visibility */
+    }
+
+    /* Minimal adjustments for printing */
+    .print\:p-0 {
+        padding: 0 !important;
+    }
+    .print\:py-1 {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    .print\:text-\[10px\] {
+        font-size: 10px !important;
+    }
+    .print\:text-\[12px\] {
+        font-size: 12px !important;
+    }
+    .print\:border-none {
+        border: none !important;
+    }
+}
+
+@media print {
+  /* Hide the sidebar and action bar on print */
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Reset margins for clean PDF output */
+  body, #root {
+    margin: 0;
+    padding: 0;
+    /* Forces browsers to print background colors and images */
+    -webkit-print-color-adjust: exact !important; 
+    print-color-adjust: exact !important;
+  }
+  
+  /* Ensure the template takes up the whole page without shadows/borders */
+  #document-template {
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    min-height: 100vh; /* Ensure full page height */
+  }
+
+  /* Make sure text colors are preserved */
+  /* * {
+    color: #000 !important;
+  } */
+} 
+
+/* Set the default font */
+body {
+  font-family: 'Inter', sans-serif;
+}
