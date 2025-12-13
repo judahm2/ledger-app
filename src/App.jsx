@@ -4,12 +4,12 @@ import { LogIn, FileText, Settings, Download, Upload, Plus, Search, Calendar, Do
 // --- 1. FIREBASE & AUTH CONFIGURATION (Client-side) ---
 // Note: In a real environment, __firebase_config and __initial_auth_token are provided globally.
 const firebaseConfig = {
-  apiKey: "AIzaSyBNevKsqcHGt2XRm4ELdnJmIrWN7b62FmY",
-  authDomain: "documets-ledger.firebaseapp.com",
-  projectId: "documets-ledger",
-  storageBucket: "documets-ledger.firebasestorage.app",
-  messagingSenderId: "974348742536",
-  appId: "1:974348742536:web:22476ccbbb597cd575543d"
+  apiKey: "AIzaSyCeSoePIKZLQgXSErE2vyjdmpzd2blhUhY",
+  authDomain: "leger-app-228f2.firebaseapp.com",
+  projectId: "leger-app-228f2",
+  storageBucket: "leger-app-228f2.firebasestorage.app",
+  messagingSenderId: "23840369680",
+  appId: "1:23840369680:web:0ec69e2f99f2be288b6e95"
 };
 
 // --- 2. DUMMY DATA STRUCTURES ---
@@ -181,7 +181,7 @@ const ClientDetailsBlock = ({ details, isEditable, onDetailChange, customers, on
 
             {/* Customer Selection Dropdown - HIDDEN ON PRINT */}
             <div className="mb-4 print:hidden">
-                <label className="fex text-xs font-semibold text-gray-700 mb-1 flex items-center">
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
                     <User size={14} className="mr-1" /> Select Existing Customer:
                 </label>
                 <select 
@@ -490,7 +490,7 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
             </div>
 
             {/* REPLACED hardcoded border color with inline style */}
-            <hr className="my-4 border-t-" style={{ borderColor: primaryColor }}/>
+            <hr className="my-4 border-t-1" style={{ borderColor: primaryColor }}/>
             
             <ClientDetailsBlock 
                 details={currentDoc.clientDetails} 
@@ -692,6 +692,11 @@ const App = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
 
+  // --- NEW LOGIN STATE ---
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   // Ref for the hidden file input element (used for data upload)
   const fileInputRef = useRef(null);
   // NEW Ref for the hidden logo file input element (used for logo upload)
@@ -758,18 +763,28 @@ const App = () => {
     setIsModalVisible(true);
   };
   
-  // Placeholder for user login/logout
-  const handleLogin = () => {
-    // In a real app: signInWithEmailAndPassword(auth, email, password)
-    setIsLoggedIn(true); 
-    // Simulate setting a real user ID after successful login
-    setUserId(typeof __initial_auth_token !== 'undefined' ? 'canvas-user-8b1c4d9e' : 'mock-user-c2f3a4b9');
+  // Updated handleLogin with validation
+  const handleLogin = (e) => {
+    e.preventDefault(); // Prevent browser reload
+
+    // Simple validation logic
+    if (loginPassword === '12345' || loginPassword === 'admin') { 
+        setIsLoggedIn(true); 
+        setUserId(typeof __initial_auth_token !== 'undefined' ? 'canvas-user-8b1c4d9e' : 'mock-user-' + loginEmail.split('@')[0]);
+        setLoginError(''); // Clear errors
+    } else {
+        setLoginError('Incorrect password. Try "12345" or "admin".');
+    }
   };
 
   const handleLogout = () => {
     // In a real app: signOut(auth).then(() => setIsLoggedIn(false));
     setIsLoggedIn(false);
     setUserId('UNAUTHENTICATED');
+    // Clear login inputs
+    setLoginEmail('');
+    setLoginPassword('');
+    setLoginError('');
   };
   
   // MODIFIED: Generic handler for simple detail changes
@@ -1159,19 +1174,43 @@ const App = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="p-8 bg-white shadow-xl rounded-xl w-96">
           <h2 className="text-3xl font-extrabold mb-6 text-center text-[#039dbf]">RS Finance Login</h2>
-          <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+          
+          {/* Error Message Display */}
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-lg border border-red-200 text-center">
+                {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" placeholder="user@rsfinance.co.za" required className="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-[#039dbf] focus:border-[#039dbf]" />
+              <input 
+                type="email" 
+                placeholder="user@rsfinance.co.za" 
+                required 
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-[#039dbf] focus:border-[#039dbf]"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+              />
             </div>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input type="password" placeholder="Enter password" required className="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-[#039dbf] focus:border-[#039dbf]" />
+              <input 
+                type="password" 
+                placeholder="Enter password (try: 12345)" 
+                required 
+                className="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-[#039dbf] focus:border-[#039dbf]"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+              />
             </div>
             <button type="submit" className="w-full bg-[#039dbf] text-white py-3 rounded-lg font-semibold hover:bg-[#039dbf]/90 transition shadow-lg flex items-center justify-center">
               <LogIn size={20} className="mr-2" /> Secure Log In
             </button>
-            <p className="text-center text-xs mt-4 text-gray-500">Using `__initial_auth_token` for automatic sign-in in Canvas environment.</p>
+            <p className="text-center text-xs mt-4 text-gray-500">
+                Current accepted passwords: <b>12345</b> or <b>admin</b>
+            </p>
           </form>
         </div>
       </div>
@@ -1225,7 +1264,7 @@ const App = () => {
         </div>
         
         {/* Document Sections - NOW DISPLAYS LEDGER DATA */}
-        <nav className="grow space-y-2 overflow-y-auto">
+        <nav className="flex-grow space-y-2 overflow-y-auto">
           {['Pending Quotes', 'Outstanding Invoices', 'Receipts'].map(sectionTitle => {
                 // Filter the ledger based on the section title
                 const filteredDocs = getFilteredDocs(sectionTitle).filter(doc => 
@@ -1313,7 +1352,7 @@ const App = () => {
                         
                         {/* 1. Company Name */}
                         <div className="mb-4">
-                            <label className="block text-xs font-semibold text-gray-700 mb-1 items-center">
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
                                 <User2 size={14} className='mr-1' /> Company Name:
                             </label>
                             <input 
@@ -1326,13 +1365,13 @@ const App = () => {
                         
                         {/* 2. Logo Upload/URL */}
                         <div className="mb-4 border-t pt-4">
-                            <label className="block text-xs font-semibold text-gray-700 mb-2  items-center">
+                            <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
                                 <ImageIcon size={14} className='mr-1' /> Logo Upload:
                             </label>
                             <div className='flex space-x-2 items-center'>
                                 <button
                                     onClick={handleLogoUploadClick}
-                                    className='shrink-0 bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition'
+                                    className='flex-shrink-0 bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition'
                                 >
                                     Upload File
                                 </button>
@@ -1515,7 +1554,7 @@ const App = () => {
         </div>
         
         {/* 7. TEMPLATE SECTION */}
-        <div className="p-8 grow overflow-y-auto">
+        <div className="p-8 flex-grow overflow-y-auto">
             {/* The DocumentTemplate component renders the chosen style */}
             <DocumentTemplate
                 currentDoc={currentDoc}
