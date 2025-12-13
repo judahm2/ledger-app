@@ -4,12 +4,21 @@ import { LogIn, FileText, Settings, Download, Upload, Plus, Search, Calendar, Do
 // --- 1. FIREBASE & AUTH CONFIGURATION (Client-side) ---
 // Note: In a real environment, __firebase_config and __initial_auth_token are provided globally.
 const firebaseConfig = {
+<<<<<<< HEAD
   apiKey: "AIzaSyBNevKsqcHGt2XRm4ELdnJmIrWN7b62FmY",
   authDomain: "documets-ledger.firebaseapp.com",
   projectId: "documets-ledger",
   storageBucket: "documets-ledger.firebasestorage.com",
   messagingSenderId: "974348742536",
   appId: "1:974348742536:web:22476ccbbb597cd575543d"
+=======
+  apiKey: "AIzaSyCeSoePIKZLQgXSErE2vyjdmpzd2blhUhY",
+  authDomain: "leger-app-228f2.firebaseapp.com",
+  projectId: "leger-app-228f2",
+  storageBucket: "leger-app-228f2.firebasestorage.app",
+  messagingSenderId: "23840369680",
+  appId: "1:23840369680:web:0ec69e2f99f2be288b6e95"
+>>>>>>> 08e51c0ecf1c20d181bef026bef7749f3cb4b439
 };
 
 // --- 2. DUMMY DATA STRUCTURES ---
