@@ -29,32 +29,45 @@ const defaultBrandingSettings = {
     primaryColor: '#039dbf', // Revolit Blue
     accentColor: '#e9b318',  // Revolit Yellow
     companyName: 'REVOLIT SOLUTIONS',
-    // NEW: Default template setting
-    defaultTemplateStyle: 'StyleA',
+    // RENAMED from StyleA
+    defaultTemplateStyle: 'ModernStyle', 
     // Using a default Base64 or external URL for initial state
-    logoUrl: "https://revolitsolutions.co.za/wp-content/uploads/2025/11/revolitlogo-yellow-icon-2024.png", 
+    logoUrl: "https://", 
     // NEW: Editable Company Info
     companyInfo: {
-        address: '611 Lydia Street Birchleigh North Ex 3, Kempton',
+        address: 'Address',
         phone: '064 546 8642',
         email: 'info@rs.co.za',
         vatNo: '91976412451',
     },
-    // NEW: Editable Footer Details
+    // NEW: Editable Footer Details - UPDATED STRUCTURE for Payment Details
     paymentDetails: {
-        accHolder: 'REVOLIT SOLUTIONS',
-        accNo: 'FNB ACC NO. 63165202276',
+        accountHolder: 'REVOLIT SOLUTIONS', // Updated key
+        bankName: 'FNB', // New key
+        accountNumber: '0000000', // Updated key
         paymentNote: 'Payment must be made in full before the due date.',
     },
     contactDetails: {
-        contactName: 'Nakedi Mphela',
+        contactName: 'Mr Mphela',
         contactPhone: '+27 64 546 8642',
-        contactEmail: 'nakedi@revolitsolutions.co.za',
+        contactEmail: 'info@revolitsolutions.co.za',
         thankYouNote: 'Thank you for choosing us!',
     },
     // Simple template B thank you note (kept separate for template B simplicity)
     templateBThankYou: 'Thank you for your business!',
 };
+
+// NEW: Template Options for Selector (defines 6 templates with unique names)
+const TemplateOptions = [
+    // Map existing components to new names
+    { id: 'ModernStyle', name: 'Modern Style (Default)', description: 'The structured Revolit invoice layout.' },
+    { id: 'SimpleStyle', name: 'Simple Style (Minimal)', description: 'A clean, modern layout with minimal borders.' },
+    // Placeholder names for future templates (C, D, E, F)
+    { id: 'StyleC', name: 'Professional (Monochrome)', description: 'A simple, black-and-white professional look.' },
+    { id: 'StyleD', name: 'Vibrant (Modern)', description: 'A bold, modern design with full-width color sections.' },
+    { id: 'StyleE', name: 'Formal (Detailed)', description: 'Focus on clear data presentation and legal details.' },
+    { id: 'StyleF', name: 'Compact (Quick View)', description: 'A condensed view for quick, smaller transactions.' },
+];
 
 // MODIFIED: Accepts the sequential number as an argument and pads it.
 const generateDateBasedID = (prefix, sequenceNum) => {
@@ -93,7 +106,7 @@ const initialClient = {
 };
 
 // MODIFIED: Accepts defaultTemplate parameter and uses it
-const initialData = (docType = 'Invoice', id = null, defaultTemplate = 'StyleA') => ({
+const initialData = (docType = 'Invoice', id = null, defaultTemplate = 'ModernStyle') => ({ // RENAMED default template to 'ModernStyle'
   // Use the generated ID for new documents, or a temporary ID for the current editor state
   id: id || `TEMP-${Date.now()}`, 
   documentType: docType, // 'Invoice', 'Quotation', 'Receipt'
@@ -132,7 +145,7 @@ const sampleLedger = [
     {
         ...initialData('Invoice', 'RS-2025-12-09-001'),
         status: 'Outstanding',
-        templateStyle: 'StyleA', // Set default template style
+        templateStyle: 'ModernStyle', // Set default template style
         // Date is used for cycle counting: December 2025 is in the 2025 cycle
         documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-001', date: '2025-12-05', isPaid: false, stampText: '' },
         clientDetails: tempSampleCustomers[0],
@@ -142,7 +155,7 @@ const sampleLedger = [
     {
         ...initialData('Quotation', 'RS-2025-12-09-002'),
         status: 'Pending',
-        templateStyle: 'StyleA', // Set default template style
+        templateStyle: 'ModernStyle', // Set default template style
         documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-002', date: '2025-12-08', isPaid: false, stampText: '' },
         clientDetails: tempSampleCustomers[1],
         totals: { subtotal: 1200.00, taxRate: 15, tax: 180.00, totalDue: 1380.00 },
@@ -151,7 +164,7 @@ const sampleLedger = [
     {
         ...initialData('Receipt', 'RS-2025-12-09-003'),
         status: 'Paid',
-        templateStyle: 'StyleA', // Set default template style
+        templateStyle: 'ModernStyle', // Set default template style
         documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-003', date: '2025-12-01', isPaid: true, stampText: 'PAID' },
         clientDetails: tempSampleCustomers[2],
         totals: { subtotal: 300.00, taxRate: 15, tax: 45.00, totalDue: 345.00 },
@@ -425,10 +438,10 @@ const TotalsSummary = ({ totals, isEditable, onTotalChange, brandingSettings }) 
 
 
 // -------------------------------------------------------------
-// NEW: Template Component (Existing Layout)
+// NEW: Template Component (Existing Layout) - RENAMED to TemplateModernStyle
 // MODIFIED: Accepts brandingSettings and added editable footer
 // -------------------------------------------------------------
-const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
+const TemplateModernStyle = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
     // UPDATED: Destructure companyInfo
     const { primaryColor, accentColor, logoUrl, companyName, companyInfo, paymentDetails, contactDetails } = brandingSettings;
     
@@ -609,21 +622,30 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                     {/* REPLACED hardcoded text color with inline style */}
                     <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Payment Details</h3>
                     
-                    {/* Editable Account Holder */}
+                    {/* Editable Account Holder - UPDATED */}
                     <EditableFooterInput 
-                        label="Acc Holder" 
+                        label="Account Holder" 
                         section="brandingSettings.paymentDetails" 
-                        key="accHolder" 
-                        value={paymentDetails.accHolder} 
+                        key="accountHolder" 
+                        value={paymentDetails.accountHolder} 
                         readOnly={false}
                     />
 
-                    {/* Editable Account Number */}
+                    {/* Editable Bank Name - NEW FIELD */}
                     <EditableFooterInput 
-                        label="Account No" 
+                        label="Bank" 
                         section="brandingSettings.paymentDetails" 
-                        key="accNo" 
-                        value={paymentDetails.accNo} 
+                        key="bankName" 
+                        value={paymentDetails.bankName} 
+                        readOnly={false}
+                    />
+
+                    {/* Editable Account Number - UPDATED */}
+                    <EditableFooterInput 
+                        label="Account Number" 
+                        section="brandingSettings.paymentDetails" 
+                        key="accountNumber" 
+                        value={paymentDetails.accountNumber} 
                         readOnly={false}
                     />
 
@@ -634,7 +656,7 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                                 type="text"
                                 value={paymentDetails.paymentNote}
                                 onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'paymentNote', e.target.value)}
-                                className={`w-full p-0.5 border-b border-gray-300 focus:outline-none bg-transparent`}
+                                className={`w-full p-0.5  border-gray-300 focus:outline-none bg-transparent`}
                                 style={{ borderBottomColor: primaryColor }}
                             />
                         ) : (
@@ -646,37 +668,49 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                 <div className="text-left sm:text-right">
                     <p className="font-bold mb-2">If you have any questions about this document, please contact:</p>
                     
-                    {/* Editable Contact Name and Phone (combined for a simple display) */}
-                    <div className='text-xs flex flex-col sm:flex-row sm:justify-end mb-0.5'>
-                        <EditableFooterInput 
-                            label="" 
-                            section="brandingSettings.contactDetails" 
-                            key="contactName" 
-                            value={contactDetails.contactName} 
-                            readOnly={false}
-                        />
-                        <EditableFooterInput 
-                            label="" 
-                            section="brandingSettings.contactDetails" 
-                            key="contactPhone" 
-                            value={contactDetails.contactPhone} 
-                            readOnly={false}
-                        />
+                    {/* START OF EDITED SECTION: Contact Name, Phone, and Email on one line (responsive) */}
+                    <div className='text-xs flex flex-col sm:flex-row sm:justify-end sm:space-x-2 flex-wrap'>
+                        {/* 1. Contact Name */}
+                        <div className='flex items-center mb-0.5 sm:mb-0'>
+                            <span className='font-semibold mr-1 shrink-0'>Contact:</span>
+                            <input
+                                type="text"
+                                value={contactDetails.contactName}
+                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactName', e.target.value)}
+                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
+                                style={isEditable ? { borderBottomColor: primaryColor } : {}}
+                                readOnly={!isEditable}
+                            />
+                        </div>
+                        
+                        {/* 2. Contact Phone */}
+                        <div className='flex items-center mb-0.5 sm:mb-0'>
+                            <span className='font-semibold mr-1 shrink-0'>Tel:</span>
+                            <input
+                                type="text"
+                                value={contactDetails.contactPhone}
+                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactPhone', e.target.value)}
+                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
+                                style={isEditable ? { borderBottomColor: primaryColor } : {}}
+                                readOnly={!isEditable}
+                            />
+                        </div>
+                        
+                        {/* 3. Contact Email */}
+                        <div className='flex items-center mb-0.5 sm:mb-0'>
+                            <span className='font-semibold mr-1 shrink-0'>Email:</span>
+                            <input
+                                type="text"
+                                value={contactDetails.contactEmail}
+                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactEmail', e.target.value)}
+                                // REPLACED hardcoded text color with inline style
+                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
+                                style={{ color: primaryColor, borderBottomColor: isEditable ? primaryColor : undefined }}
+                                readOnly={!isEditable}
+                            />
+                        </div>
                     </div>
-                    
-                    {/* Editable Contact Email */}
-                    <div className='text-xs flex flex-col sm:flex-row sm:justify-end mb-0.5'>
-                        <span className='font-semibold mr-1 shrink-0'>Email:</span>
-                        <input
-                            type="text"
-                            value={contactDetails.contactEmail}
-                            onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactEmail', e.target.value)}
-                            // REPLACED hardcoded text color with inline style
-                            className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
-                            style={{ color: primaryColor, borderBottomColor: isEditable ? primaryColor : undefined }}
-                            readOnly={!isEditable}
-                        />
-                    </div>
+                    {/* END OF EDITED SECTION */}
 
                     {/* Editable Thank You Note */}
                     <div className="mt-4 text-sm font-bold" style={{ color: primaryColor }}>
@@ -700,10 +734,10 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
 
 
 // -------------------------------------------------------------
-// NEW: Template Component Style B (Simple Variant)
+// NEW: Template Component Style B (Simple Variant) - RENAMED to TemplateSimpleStyle
 // MODIFIED: Accepts brandingSettings and added editable footer
 // -------------------------------------------------------------
-const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
+const TemplateSimpleStyle = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
     // UPDATED: Destructure companyInfo
     const { primaryColor, logoUrl, companyName, companyInfo, templateBThankYou } = brandingSettings;
     return (
@@ -746,7 +780,7 @@ const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                     <p className="text-xs text-gray-600">{companyInfo.address}</p>
                 </div>
             </div>
-
+            
             {/* Client Details (Simplified for Template B) - MADE RESPONSIVE */}
             <div className="flex flex-col md:flex-row justify-between items-start mb-8 space-y-4 md:space-y-0">
                 {/* BILL TO */}
@@ -756,29 +790,30 @@ const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                     <p className="text-sm font-semibold">{currentDoc.clientDetails.name} ({currentDoc.clientDetails.company})</p>
                     <p className="text-xs text-gray-600">{currentDoc.clientDetails.address}</p>
                     <p className="text-xs text-gray-600">{currentDoc.clientDetails.cityStateZip}</p>
-                    <p className="text-xs text-gray-600">P: {currentDoc.clientDetails.phone}</p>
-                    <p className="text-xs text-gray-600">E: {currentDoc.clientDetails.email}</p>
+                    <p className="text-xs text-gray-600">{currentDoc.clientDetails.email}</p>
                 </div>
                 
-                {/* Terms and Customer ID */}
-                <div className='w-full md:w-1/2 md:pl-8 pt-4 md:pt-0'>
-                    <div className="flex justify-between items-center mb-2">
-                        <p className="text-xs font-semibold text-gray-700">Terms:</p>
-                        <p className="text-sm font-bold text-gray-800">{currentDoc.documentDetails.terms}</p>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <p className="text-xs font-semibold text-gray-700">Customer ID:</p>
-                        <p className="text-sm font-bold" style={{ color: primaryColor }}>{currentDoc.clientDetails.id}</p>
+                {/* OTHER DOC DETAILS */}
+                <div className="w-full md:w-1/2 md:pl-8">
+                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-700">Details</h3>
+                    <div className="space-y-1">
+                        <p className="text-xs">
+                            <span className="font-semibold">VAT No:</span> {companyInfo.vatNo}
+                        </p>
+                        <p className="text-xs">
+                            <span className="font-semibold">Terms:</span> {currentDoc.documentDetails.terms}
+                        </p>
+                        {/* New Payment Details Display (Simplified) */}
+                        <p className="text-xs pt-2">
+                            <span className="font-semibold" style={{ color: primaryColor }}>
+                                Payment:
+                            </span> {brandingSettings.paymentDetails.accountHolder} - {brandingSettings.paymentDetails.bankName} Acc: {brandingSettings.paymentDetails.accountNumber}
+                        </p>
+                        
                     </div>
                 </div>
             </div>
 
-            {/* Note about client details editing: client block is crucial for the app. */}
-            <div className='mt-2 print:hidden'>
-                <p className='text-xs font-semibold text-gray-700'>Note: To edit client details, please switch back to Template A.</p>
-            </div>
-
-            {/* Line Items Table (Using the shared component) */}
             <LineItemsTable 
                 items={currentDoc.lineItems} 
                 isEditable={isEditable} 
@@ -788,8 +823,8 @@ const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                 brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
             />
 
-            {/* Totals Summary (Using the shared component) - Added max-w-full and mx-auto for mobile */}
-            <div className='max-w-full mx-auto'>
+            {/* Totals Summary - Added max-w-full and mx-auto for mobile */}
+            <div className='max-w-full mx-auto'> 
                 <TotalsSummary 
                     totals={currentDoc.totals} 
                     isEditable={isEditable} 
@@ -797,55 +832,49 @@ const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                     brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
                 />
             </div>
-
-            <hr className="my-6 border-gray-300" />
-
-            {/* Footer (NOW EDITABLE Thank You Note) */}
-            <div className="text-center text-xs text-gray-600">
-                <p className="font-bold">Total Due: {formatCurrency(currentDoc.totals.totalDue)}</p>
-                <p className="mt-2">Payment Terms: {currentDoc.documentDetails.terms}</p>
-                
-                {/* Editable Template B Thank You Note */}
-                <div className="mt-4 italic">
+            
+            <hr className="my-6 border-gray-200" />
+            
+            {/* Footer - Simple Thank You Note */}
+            <div className="text-center">
+                {/* Editable Thank You Note */}
+                <div className="mt-4 text-sm font-bold" style={{ color: primaryColor }}>
                     {isEditable ? (
                         <input
                             type="text"
                             value={templateBThankYou}
                             onChange={(e) => handleTemplateDetailChange('brandingSettings', 'templateBThankYou', e.target.value)}
                             className={`w-full text-center p-0.5 border-b border-gray-300 focus:outline-none bg-transparent`}
-                            style={{ borderBottomColor: primaryColor }}
+                            style={{ borderBottomColor: primaryColor, color: primaryColor }}
                         />
                     ) : (
                         templateBThankYou
                     )}
                 </div>
             </div>
+
         </div>
     );
 };
 
 
 // -------------------------------------------------------------
-// NEW: DocumentTemplate Switcher Component
-// MODIFIED: DocumentTemplate now accepts brandingSettings
+// TEMPLATE SWITCHER - UPDATED WITH NEW NAMES
 // -------------------------------------------------------------
 const DocumentTemplate = (props) => {
     switch (props.currentDoc.templateStyle) {
-        case 'StyleB':
-            return <TemplateStyleB {...props} />;
-        case 'StyleA':
+        case 'SimpleStyle': // Renamed from StyleB
+            return <TemplateSimpleStyle {...props} />; // Renamed component
+        case 'ModernStyle': // Renamed from StyleA
         default:
-            return <TemplateStyleA {...props} />;
+            return <TemplateModernStyle {...props} />; // Renamed component
     }
 };
-
 
 // -------------------------------------------------------------
 // MAIN APP COMPONENT
 // -------------------------------------------------------------
-
 const App = () => {
-
     // Helper to calculate totals based on line items and tax rate
     const recalculateTotals = (items, taxRate) => {
         const subtotal = items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
@@ -854,131 +883,100 @@ const App = () => {
         return { subtotal, taxRate, tax, totalDue };
     };
 
-    // State for Branding/Color Settings (MODIFIED to use getInitialState for deep merge)
-    const [brandingSettings, setBrandingSettings] = useState(getInitialState('brandingSettings', defaultBrandingSettings));
-    
-    // Use the loaded default template style for initial document state
-    const defaultTemplateFromBranding = brandingSettings.defaultTemplateStyle || 'StyleA';
-
-    // State for Document Data
-    const [documentLedger, setDocumentLedger] = useState(getInitialState('documentLedger', sampleLedger));
-    const [customerList, setCustomerList] = useState(getInitialState('customerList', tempSampleCustomers));
-    // UPDATED: Use the defaultTemplateFromBranding for the initial document
-    const [currentDoc, setCurrentDoc] = useState(getInitialState('currentDoc', initialData('Invoice', null, defaultTemplateFromBranding)));
-    
-    // State for UI/Editor
-    const [isEditable, setIsEditable] = useState(true); // Always editable by default for a new or loaded doc
-    const [sectionTitle, setSectionTitle] = useState('Invoices'); // Default to Invoices view on load
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false); // NEW: State for template selector
-    // MODIFIED: State for Color Settings Modal/Panel is now for Branding
-    const [isBrandingSettingsOpen, setIsBrandingSettingsOpen] = useState(false); 
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
-    // NEW STATE FOR MOBILE RESPONSIVENESS
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    
-    // NEW: State for Edit Button Hover
-    const [isEditButtonHovered, setIsEditButtonHovered] = useState(false); // ADDED NEW STATE
-
-    // NEW: State for login credentials and error
+    // State for Authentication
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userId, setUserId] = useState(null); // The Firebase user ID
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginError, setLoginError] = useState('');
 
+    // State for Branding/Color Settings (MODIFIED to use getInitialState for deep merge)
+    const [brandingSettings, setBrandingSettings] = useState(getInitialState('brandingSettings', defaultBrandingSettings));
+    
+    // Use the loaded default template style for initial document state
+    const defaultTemplateFromBranding = brandingSettings.defaultTemplateStyle || 'ModernStyle'; // Updated fallback
 
-    // State for Authentication and User Info
-    // Initialize to unauthenticated/loading state. Actual state will be set by onAuthStateChanged.
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userId, setUserId] = useState('UNAUTHENTICATED'); // Will be set by Firebase Auth
+    // State for Document Data
+    const [documentLedger, setDocumentLedger] = useState(getInitialState('documentLedger', sampleLedger));
+    const [customerList, setCustomerList] = useState(getInitialState('customerList', tempSampleCustomers));
+    const [currentDoc, setCurrentDoc] = useState(initialData('Invoice', null, defaultTemplateFromBranding));
+    
+    // UI State
+    const [sectionTitle, setSectionTitle] = useState('Invoices'); // Current view: 'Invoices', 'Quotations', 'Receipts', 'Customers'
+    const [isEditable, setIsEditable] = useState(false);
+    const [isBrandingSettingsOpen, setIsBrandingSettingsOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [modal, setModal] = useState({ isVisible: false, message: '' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isEditButtonHovered, setIsEditButtonHovered] = useState(false); // New state for hover effect
 
-    // Ref for the hidden file input element (used for data upload)
-    const fileInputRef = useRef(null);
-    // NEW Ref for the hidden logo file input element (used for logo upload)
+    // Refs for file inputs
     const logoInputRef = useRef(null);
+    const fileInputRef = useRef(null); // For data upload
 
-    // *** NEW useEffect Hooks for Local Storage Persistence ***
-    // Effect 1: Save Document Ledger to localStorage
-    useEffect(() => {
-        localStorage.setItem('documentLedger', JSON.stringify(documentLedger));
-    }, [documentLedger]);
-
-    // Effect 2: Save Customer List to localStorage
-    useEffect(() => {
-        localStorage.setItem('customerList', JSON.stringify(customerList));
-    }, [customerList]);
-
-    // Effect 3: Save Current User ID to localStorage (for persistence of login state)
-    // This runs after onAuthStateChanged sets the userId.
-    useEffect(() => {
-        localStorage.setItem('userId', userId);
-    }, [userId]);
-
-    // Effect 4: Save Current Document to localStorage (to restore editor state)
-    useEffect(() => {
-        localStorage.setItem('currentDoc', JSON.stringify(currentDoc));
-    }, [currentDoc]);
-
-    // Effect 5 (MODIFIED): Save Branding Settings to localStorage
-    useEffect(() => {
-        localStorage.setItem('brandingSettings', JSON.stringify(brandingSettings));
-    }, [brandingSettings]);
-    // *** END Local Storage Persistence Hooks ***
-
-    // NEW EFFECT: Firebase Auth State Listener
+    // Firebase Auth Listener
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in
                 setIsLoggedIn(true);
                 setUserId(user.uid);
-                setLoginError(''); // Clear any previous errors
-                console.log("Firebase User signed in:", user.uid);
+                // Load data specific to this user/session if needed
             } else {
                 // User is signed out
                 setIsLoggedIn(false);
-                setUserId('UNAUTHENTICATED');
-                console.log("Firebase User signed out.");
+                setUserId(null);
             }
         });
 
-        // Clean up listener on component unmount
+        // Cleanup listener on unmount
         return () => unsubscribe();
-    }, []); // Run only once on mount
-
-
-    // Use useCallback for stable function definitions
-    const calculateTotals = useCallback((items, taxRate) => {
-        const subtotal = items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
-        const tax = subtotal * (taxRate / 100);
-        const totalDue = subtotal + tax;
-        return { subtotal, taxRate, tax, totalDue };
     }, []);
 
 
-    // *** FIREBASE AUTH HANDLERS (REPLACED MOCK LOGIC) ***
+    // Save data to localStorage whenever it changes
+    useEffect(() => {
+        // Only save state if a user is logged in (simple persistence proxy)
+        if (isLoggedIn) {
+            localStorage.setItem('documentLedger', JSON.stringify(documentLedger));
+            localStorage.setItem('customerList', JSON.stringify(customerList));
+            localStorage.setItem('brandingSettings', JSON.stringify(brandingSettings));
+        }
+    }, [documentLedger, customerList, brandingSettings, isLoggedIn]);
+
+
+    // Recalculate totals whenever line items or tax rate changes
+    useEffect(() => {
+        const { lineItems, totals } = currentDoc;
+        const newTotals = recalculateTotals(lineItems, totals.taxRate);
+        
+        // Prevent infinite loop by checking if totals actually changed before setting state
+        if (newTotals.subtotal !== totals.subtotal || newTotals.tax !== totals.tax || newTotals.totalDue !== totals.totalDue) {
+            setCurrentDoc(prevDoc => ({
+                ...prevDoc,
+                totals: newTotals
+            }));
+        }
+    }, [currentDoc.lineItems, currentDoc.totals.taxRate]); // Dependency on lineItems and taxRate
+
+    // Utility to show modal messages
+    const showModal = (message) => {
+        setModal({ isVisible: true, message });
+    };
 
     // Refactored Handler for Firebase Login
     const handleLogin = async () => {
-        setLoginError(''); // Clear previous error
-
+        setLoginError(''); // Clear previous errors
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // Auth state listener (onAuthStateChanged) will handle setting isLoggedIn and userId on success.
-            // Clear form fields on successful login
-            setEmail('');
-            setPassword('');
+            // Auth state listener handles setting isLoggedIn/userId
+            showModal('Login successful!');
         } catch (error) {
-            console.error("Firebase Login Error:", error.code, error.message);
-            let errorMessage = "Login failed. Please check your credentials.";
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                errorMessage = "Invalid email or password.";
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = "The email address is not valid.";
-            } else if (error.code === 'auth/too-many-requests') {
-                 errorMessage = "Access to this account has been temporarily blocked due to many failed login attempts.";
-            }
+            // Firebase error codes are specific. We can generalize the message.
+            const errorMessage = error.message.includes('auth/invalid-credential') 
+                ? 'Invalid email or password. Please try again.' 
+                : error.message;
             setLoginError(errorMessage);
         }
     };
@@ -1003,246 +1001,183 @@ const App = () => {
                 const parts = section.split('.'); // e.g., ['brandingSettings', 'paymentDetails']
                 let newState = { ...prev };
                 
-                // Handle top-level branding change (e.g., 'brandingSettings', 'companyName' or 'defaultTemplateStyle')
                 if (parts.length === 1) {
-                    newState[key] = value;
-                } 
-                // Handle nested branding change (e.g., 'brandingSettings.companyInfo', 'address')
-                else if (parts.length === 2) {
-                    const nestedKey = parts[1]; // 'companyInfo', 'paymentDetails', or 'contactDetails'
-                    newState = {
-                        ...newState,
-                        [nestedKey]: {
-                            ...newState[nestedKey],
-                            [key]: value
-                        }
+                    // Top-level branding change (e.g., 'companyName' or 'defaultTemplateStyle')
+                    newState = { ...newState, [key]: value };
+                } else if (parts.length === 2 && newState[parts[1]]) {
+                    // Nested branding change (e.g., 'brandingSettings.paymentDetails')
+                    const nestedKey = parts[1];
+                    newState[nestedKey] = {
+                        ...newState[nestedKey],
+                        [key]: value
                     };
-                } else {
-                    console.error('Too many nesting levels for branding update.');
-                    return prev;
                 }
                 return newState;
             });
-            return; // Stop here if it was a branding setting update
+            return;
         }
 
-        // 2. Otherwise, proceed with currentDoc update
-        setCurrentDoc(prev => {
-            let newDoc = { ...prev };
-            let newSection;
-
-            if (section === 'lineItems') {
-                // Line items are handled by handleLineItemChange/handleDeleteItem/handleAddItem
-                // This path should ideally not be hit.
-                console.error('handleTemplateDetailChange called incorrectly for lineItems.');
-                return prev;
-            } else if (section === 'totals') {
-                newSection = { ...prev.totals, [key]: parseFloat(value) || 0 };
-                newDoc.totals = calculateTotals(newDoc.lineItems, newSection.taxRate);
-            } else if (section === 'documentDetails' || section === 'clientDetails') {
-                newSection = { ...prev[section], [key]: value };
-                newDoc[section] = newSection;
-            } else {
-                console.error(`Unknown section: ${section}`);
-                return prev;
+        // 2. Handle normal document changes
+        setCurrentDoc(prevDoc => {
+            if (prevDoc[section]) {
+                return {
+                    ...prevDoc,
+                    [section]: {
+                        ...prevDoc[section],
+                        [key]: value
+                    }
+                };
             }
-
-            return newDoc;
+            return prevDoc;
         });
     };
-
-    // Handler for changes within Branding Settings (for the dedicated settings panel)
+    
+    // Handler specifically for branding settings (top-level properties only)
     const handleBrandingChange = (key, value) => {
+        // This is a simpler version that can be used for top-level branding properties only (colors, name, logoUrl)
         setBrandingSettings(prev => ({
             ...prev,
             [key]: value,
         }));
     };
 
-    // Handler to trigger the hidden logo file input
-    const handleLogoUploadClick = () => {
-        logoInputRef.current.click();
-    };
 
-    const handleLogoUpload = (event) => {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                handleBrandingChange('logoUrl', e.target.result); // Save Base64 string
-                showModal('Logo uploaded and saved successfully!');
+    const handleLineItemChange = useCallback((index, key, value) => {
+        setCurrentDoc(prevDoc => {
+            const newItems = prevDoc.lineItems.map((item, i) => {
+                if (i === index) {
+                    // Ensure quantities and prices are numbers
+                    let newValue = value;
+                    if (key === 'qty' || key === 'unitPrice') {
+                        // Parse as float, fallback to 0 if invalid
+                        newValue = parseFloat(value) || 0;
+                    }
+
+                    const updatedItem = { ...item, [key]: newValue };
+                    // Recalculate amount for the updated item
+                    updatedItem.amount = updatedItem.qty * updatedItem.unitPrice;
+                    return updatedItem;
+                }
+                return item;
+            });
+
+            // Recalculate totals based on new items and existing tax rate
+            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
+
+            return {
+                ...prevDoc,
+                lineItems: newItems,
+                totals: newTotals,
             };
-            reader.readAsDataURL(file); // Convert image to Base64
-        } else if (file) {
-            showModal('Error: Please select a valid image file.');
-        }
-        // Clear the input value so the same file can be uploaded again
-        event.target.value = null;
-    };
+        });
+    }, [recalculateTotals]);
 
-    // Handler for line item changes
-    const handleLineItemChange = (index, key, value) => {
-        const newItems = [...currentDoc.lineItems];
-        let val = value;
-        if (key === 'qty' || key === 'unitPrice') {
-            val = parseFloat(value) || 0; // Ensure numbers are numbers
-        }
-        newItems[index] = { 
-            ...newItems[index], 
-            [key]: val, 
-            // Re-calculate amount for the item based on its new state
-            amount: val * (key === 'qty' ? newItems[index].unitPrice : newItems[index].qty)
-        }; 
+    const handleAddItem = () => {
+        setCurrentDoc(prevDoc => {
+            const newItem = { description: 'New Line Item', qty: 1, unitPrice: 0.00, amount: 0.00 };
+            const newItems = [...prevDoc.lineItems, newItem];
+            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
 
-        setCurrentDoc(prev => ({
-            ...prev,
-            lineItems: newItems,
-            // Recalculate totals immediately
-            totals: calculateTotals(newItems, prev.totals.taxRate),
-        }));
+            return {
+                ...prevDoc,
+                lineItems: newItems,
+                totals: newTotals,
+            };
+        });
     };
 
     const handleDeleteItem = (index) => {
-        setCurrentDoc(prev => {
-            const newItems = prev.lineItems.filter((_, i) => i !== index);
+        setCurrentDoc(prevDoc => {
+            const newItems = prevDoc.lineItems.filter((_, i) => i !== index);
+            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
+
             return {
-                ...prev, 
+                ...prevDoc,
                 lineItems: newItems,
-                // Recalculate totals immediately
-                totals: calculateTotals(newItems, prev.totals.taxRate),
+                totals: newTotals,
             };
         });
     };
 
-    const handleAddItem = () => {
-        setCurrentDoc(prev => ({ 
-            ...prev, 
-            lineItems: [...prev.lineItems, { description: 'New Item', qty: 1, unitPrice: 0.00, amount: 0.00 }] 
-        }));
-    };
-
-    // Handler for selecting an existing customer from the dropdown
+    // Handler for selecting an existing customer
     const handleSelectCustomer = (customerId) => {
-        const selectedCustomer = customerList.find(c => c.id === customerId);
-        if (selectedCustomer) {
-            setCurrentDoc(prev => ({
-                ...prev,
-                clientDetails: selectedCustomer,
-            }));
-        } else if (customerId === 'NEW-CLIENT') {
-            // If selecting the 'New Client' option, reset to the initial client state
-            setCurrentDoc(prev => ({
-                ...prev,
-                clientDetails: initialClient,
+        const customer = customerList.find(c => c.id === customerId);
+        if (customer) {
+            setCurrentDoc(prevDoc => ({
+                ...prevDoc,
+                clientDetails: customer,
             }));
         }
     };
+    
+    // Handler for saving the current document
+    const saveCurrentDocument = () => {
+        // Ensure a doc number is generated if it's the initial temporary one (999)
+        if (currentDoc.documentDetails.docNo.includes('999')) {
+            const newSequence = documentLedger.length + 1; // Simple sequence counter
+            const newDocId = generateDateBasedID('RS', newSequence);
 
-
-    // Function to calculate next sequential document number and save the document
-    const handleSaveDocument = () => {
-        let docToSave = { ...currentDoc };
-        let newCustomer = null;
-        let isNewDocument = !documentLedger.some(doc => doc.id === docToSave.id);
-
-        if (isNewDocument) {
-            // 1. Determine the next sequential number based on the current ID cycle year (February reset)
-            const today = new Date();
-            const currentIDCycleYear = getIDCycleYear(today);
-
-            // Filter ledger for documents created in the current ID cycle
-            const docsInCurrentCycle = documentLedger.filter(doc => {
-                const docDate = new Date(doc.documentDetails.date);
-                const docCycleYear = getIDCycleYear(docDate);
-                return docCycleYear === currentIDCycleYear;
-            });
-
-            // Calculate the next sequential number (starts counting from 1)
-            // The count is based ONLY on documents within the current cycle, ensuring the February reset.
-            const nextDocNum = docsInCurrentCycle.length + 1;
-
-            // 2. Generate permanent Document ID (e.g., RS-2025-12-09-004)
-            const newDocId = generateDateBasedID('RS', nextDocNum);
-
-            docToSave = {
-                ...docToSave,
-                id: newDocId,
-                // Also update the display number (docNo) with the new sequential ID
-                documentDetails: { ...docToSave.documentDetails, docNo: newDocId },
-                status: docToSave.documentType === 'Receipt' ? 'Paid' : (docToSave.documentType === 'Quotation' ? 'Pending' : 'Outstanding')
+            const newDoc = {
+                ...currentDoc,
+                id: newDocId, // Update the unique ID
+                documentDetails: {
+                    ...currentDoc.documentDetails,
+                    docNo: newDocId, // Update the document number
+                },
+                // Documents created from scratch start as Draft/Outstanding/Pending unless its a Receipt
+                status: currentDoc.documentType === 'Receipt' ? 'Paid' : (currentDoc.documentType === 'Quotation' ? 'Pending' : 'Outstanding'),
             };
 
-            // 3. Assign permanent Customer ID if it's a new client AND save to customerList
-            if (docToSave.clientDetails.id === 'NEW-CLIENT') {
-                // MODIFIED: Generate Customer ID using the requested 'RS' prefix and the new sequential number
-                const newCustId = generateDateBasedID('RS', nextDocNum);
-                newCustomer = {
-                    ...docToSave.clientDetails,
-                    id: newCustId,
-                };
-                docToSave = {
-                    ...docToSave,
-                    clientDetails: newCustomer,
-                };
-            }
+            // Add the new document to the ledger
+            setDocumentLedger(prevLedger => [
+                newDoc,
+                ...prevLedger, // Add new documents to the start of the list
+            ]);
+            
+            setCurrentDoc(newDoc); // Load the finalized document back into the editor
+            showModal(`New ${newDoc.documentType} ${newDoc.documentDetails.docNo} saved successfully!`);
+
         } else {
-            // ADDED LOGIC FOR UPDATING EXISTING CUSTOMERS
-            // If this is an update to an existing document, and the clientDetails.id is NOT 'NEW-CLIENT'
-            // (meaning it's an existing customer or one that was just created), update the customer list too.
-            if (docToSave.clientDetails.id !== 'NEW-CLIENT') {
-                newCustomer = docToSave.clientDetails;
-            }
-            // Ensure status is correctly set on update
-            docToSave = {
-                 ...docToSave,
-                 status: docToSave.documentType === 'Receipt' ? 'Paid' : (docToSave.documentType === 'Quotation' ? 'Pending' : 'Outstanding')
-            };
+            // Update existing document in the ledger
+            setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === currentDoc.id ? currentDoc : doc));
+            showModal(`${currentDoc.documentType} ${currentDoc.documentDetails.docNo} updated successfully!`);
         }
-
-
-        // 4. Update Ledger
-        setDocumentLedger(prevLedger => {
-            const index = prevLedger.findIndex(d => d.id === docToSave.id);
-            if (index > -1) {
-                // Update existing document
-                const newLedger = [...prevLedger];
-                newLedger[index] = docToSave;
-                return newLedger;
-            } else {
-                // Add new document
-                return [...prevLedger, docToSave];
-            }
-        });
-
-        // 5. Update Customer List
-        if (newCustomer) {
-            setCustomerList(prevList => {
-                const index = prevList.findIndex(c => c.id === newCustomer.id);
-                if (index > -1) {
-                    // Update existing customer
-                    const newCustomers = [...prevList];
-                    newCustomers[index] = newCustomer;
-                    return newCustomers;
-                } else if (newCustomer.id !== 'NEW-CLIENT') {
-                    // Add new customer
-                    return [...prevList, newCustomer];
-                }
-                return prevList; // Should not happen if logic is correct
-            });
-        }
-
-        // 6. Finalize UI state
-        setCurrentDoc(docToSave);
-        console.log(`Saving document: ${docToSave.documentDetails.docNo}`, docToSave);
-        showModal(`${docToSave.documentType} ${docToSave.documentDetails.docNo} has been saved successfully!`);
+        setIsEditable(false); // Disable editing after save
+    };
+    
+    // Handler for creating a new document of a specified type
+    const createNewDocument = (docType) => {
+        setCurrentDoc(initialData(docType, null, brandingSettings.defaultTemplateStyle)); // Use the default template from branding
+        setIsEditable(true);
+        setIsDropdownOpen(false); // Close the 'New' dropdown
+        setSectionTitle(docType === 'Invoice' ? 'Invoices' : (docType === 'Quotation' ? 'Quotations' : 'Receipts'));
+        setIsSidebarOpen(false); // Close sidebar on mobile
     };
 
-    // Handler for selecting an existing document from the sidebar
-    const handleSelectDocument = (docId) => {
-        const docToLoad = documentLedger.find(d => d.id === docId);
+    // Function to filter documents for display in the sidebar
+    const getFilteredDocs = (title) => {
+        if (title === 'Customers') {
+            return customerList; // Return the customer list for the customer view
+        }
+        
+        const typeMap = {
+            'Invoices': 'Invoice',
+            'Quotations': 'Quotation',
+            'Receipts': 'Receipt',
+        };
+        const docType = typeMap[title];
+        
+        // Filter by document type
+        return documentLedger.filter(doc => doc.documentType === docType)
+                             .sort((a, b) => new Date(b.documentDetails.date) - new Date(a.documentDetails.date)); // Sort by date descending
+    };
+
+    // Handler to load a document from the sidebar list
+    const loadDocumentFromLedger = (docId) => {
+        const docToLoad = documentLedger.find(doc => doc.id === docId);
         if (docToLoad) {
             // Ensure the loaded document has a templateStyle for safety
-            const safeDocToLoad = { ...docToLoad, templateStyle: docToLoad.templateStyle || 'StyleA' };
+            const safeDocToLoad = { ...docToLoad, templateStyle: docToLoad.templateStyle || 'ModernStyle' }; // Updated fallback
             setCurrentDoc(safeDocToLoad);
             // Documents loaded from the ledger are not editable by default
             setIsEditable(false);
@@ -1252,7 +1187,7 @@ const App = () => {
             setIsSidebarOpen(false);
         }
     };
-
+    
     // Placeholder for marking an invoice as paid and moving to Receipts
     const markAsPaid = () => {
         if (currentDoc.documentType === 'Invoice' && currentDoc.status === 'Outstanding') {
@@ -1270,7 +1205,7 @@ const App = () => {
             
             // 2. Update the Ledger with the paid document
             setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === paidDoc.id ? paidDoc : doc) );
-
+            
             // 3. Load the paid document into the editor
             setCurrentDoc(paidDoc);
             setIsEditable(false);
@@ -1282,51 +1217,49 @@ const App = () => {
     const handleApproveQuotation = () => {
         if (currentDoc.documentType === 'Quotation' && currentDoc.status === 'Pending') {
             // 1. Convert to Invoice
-            const invoiceDoc = {
-                ...currentDoc,
-                documentType: 'Invoice',
+            const invoiceDoc = { 
+                ...currentDoc, 
+                documentType: 'Invoice', 
                 status: 'Outstanding', // New invoices are outstanding
-                documentDetails: {
-                    ...currentDoc.documentDetails,
+                documentDetails: { 
+                    ...currentDoc.documentDetails, 
                     isPaid: false, // Invoices are not paid by default
-                    stampText: '',
-                }
+                    stampText: '', 
+                } 
             };
             
             // 2. Update the Ledger (This replaces the old quotation document)
             setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === invoiceDoc.id ? invoiceDoc : doc) );
-
+            
             // 3. Load the new invoice into the editor
             setCurrentDoc(invoiceDoc);
             setIsEditable(false);
-            showModal(`Quotation ${invoiceDoc.documentDetails.docNo} converted to Invoice and updated in the Invoices ledger!`);
+            showModal(`Quotation ${invoiceDoc.documentDetails.docNo} approved and converted to an Outstanding Invoice!`);
         }
     };
 
-    // Helper to control the modal message
-    const showModal = (message) => {
-        setModalMessage(message);
-        setIsModalVisible(true);
+    // Handler for logo file input click
+    const handleLogoUploadClick = () => {
+        logoInputRef.current.click();
     };
 
-    const closeModal = () => {
-        setIsModalVisible(false);
+    // Handler for logo file selection
+    const handleLogoFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                // Update branding settings with the Base64 URL
+                handleBrandingChange('logoUrl', reader.result);
+            };
+            reader.readAsDataURL(file); // Convert file to Base64 data URL
+            showModal('Logo uploaded successfully!');
+        }
     };
 
-    // Helper to generate a new document of a given type
-    const createNewDocument = (type) => {
-        // Use the default template style set in branding settings
-        const defaultStyle = brandingSettings.defaultTemplateStyle;
-        
-        setCurrentDoc(initialData(type, null, defaultStyle)); // initialData now assigns a TEMP- ID and uses defaultStyle
-        setIsEditable(true); // New documents should be editable
-        setIsDropdownOpen(false);
-    }
-
-    // *** Data Download/Upload Functions ***
-    // Function to download the entire application state as a JSON file
+    // Function to handle data backup (download)
     const handleDownloadData = () => {
-        // Collect all persistent data into a single object
+        // Construct the full data object
         const backupData = {
             documentLedger: documentLedger,
             customerList: customerList,
@@ -1338,7 +1271,7 @@ const App = () => {
         const jsonString = JSON.stringify(backupData, null, 2); // prettify the JSON
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-
+        
         // Create a link element to trigger the download
         const link = document.createElement('a');
         link.href = url;
@@ -1366,7 +1299,7 @@ const App = () => {
         reader.onload = (e) => {
             try {
                 const uploadedData = JSON.parse(e.target.result);
-
+                
                 // Basic validation and safe assignment
                 if (uploadedData.documentLedger && Array.isArray(uploadedData.documentLedger)) {
                     setDocumentLedger(uploadedData.documentLedger);
@@ -1374,51 +1307,35 @@ const App = () => {
                 if (uploadedData.customerList && Array.isArray(uploadedData.customerList)) {
                     setCustomerList(uploadedData.customerList);
                 }
-                // Update userId, but do NOT set isLoggedIn state directly. 
+                
+                // Update userId, but do NOT set isLoggedIn state directly.
                 // The Firebase listener should manage isLoggedIn based on the auth session.
                 if (uploadedData.userId) {
                     setUserId(uploadedData.userId);
                 }
+                
                 if (uploadedData.brandingSettings) {
                     // Use a functional update to safely merge old defaults with uploaded data
                     setBrandingSettings(getInitialState('brandingSettings', uploadedData.brandingSettings));
                 }
                 
                 showModal('Application data restored successfully!');
-                
+
             } catch (error) {
                 console.error("Error parsing or restoring file:", error);
                 showModal('Error restoring data: Invalid file format.');
             }
         };
-
         reader.readAsText(file);
+
         // Clear the input value so the same file can be uploaded again
         event.target.value = null;
     };
 
-
-    // Helper to filter documents for sidebar navigation
-    const getFilteredDocs = (sectionTitle) => {
-        switch (sectionTitle) {
-            case 'Invoices':
-                return documentLedger.filter(doc => doc.documentType === 'Invoice');
-            case 'Quotations':
-                return documentLedger.filter(doc => doc.documentType === 'Quotation');
-            case 'Receipts':
-                return documentLedger.filter(doc => doc.documentType === 'Receipt');
-            case 'Customers':
-                // Return customer list sorted by name
-                return [...customerList].sort((a, b) => a.name.localeCompare(b.name));
-            default:
-                return [];
-        }
-    }
-    
-    // NEW: Calculate the counts for the sidebar navigation links
-    const invoiceCount = documentLedger.filter(doc => doc.documentType === 'Invoice').length;
-    const quotationCount = documentLedger.filter(doc => doc.documentType === 'Quotation').length;
-    const receiptCount = documentLedger.filter(doc => doc.documentType === 'Receipt').length;
+    // Counts for sidebar badges
+    const invoiceCount = getFilteredDocs('Invoices').length;
+    const quotationCount = getFilteredDocs('Quotations').length;
+    const receiptCount = getFilteredDocs('Receipts').length;
     const customerCount = customerList.length;
 
     const navItems = [
@@ -1427,7 +1344,6 @@ const App = () => {
         { title: 'Receipts', icon: Save, count: receiptCount },
         { title: 'Customers', icon: Users, count: customerCount },
     ];
-
 
     // --- Login Screen (UPDATED FOR FIREBASE) ---
     if (!isLoggedIn) {
@@ -1447,10 +1363,10 @@ const App = () => {
                     <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Email</label>
-                            <input
-                                type="email"
-                                placeholder="user@rsfinance.co.za"
-                                required
+                            <input 
+                                type="email" 
+                                placeholder="user@rsfinance.co.za" 
+                                required 
                                 value={email} // BIND STATE
                                 onChange={(e) => setEmail(e.target.value)} // UPDATE STATE
                                 // REPLACED hardcoded focus border color with inline style
@@ -1460,10 +1376,10 @@ const App = () => {
                         </div>
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700">Password</label>
-                            <input
-                                type="password"
-                                placeholder="Enter password"
-                                required
+                            <input 
+                                type="password" 
+                                placeholder="Enter password" 
+                                required 
                                 value={password} // BIND STATE
                                 onChange={(e) => setPassword(e.target.value)} // UPDATE STATE
                                 // REPLACED hardcoded focus border color with inline style
@@ -1471,92 +1387,62 @@ const App = () => {
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             />
                         </div>
-                        <button
-                            type="submit"
+                        <button 
+                            type="submit" 
                             // REPLACED hardcoded background color with inline style
-                            className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition shadow-lg flex items-center justify-center"
+                            className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition duration-200"
                             style={{ backgroundColor: brandingSettings.primaryColor }}
                         >
-                            <LogIn size={20} className="mr-2" /> Secure Log In
+                            <LogIn size={20} className="inline mr-2" /> Log In
                         </button>
-                        {/* Removed mock token note */}
                     </form>
                 </div>
             </div>
         );
     }
-
+    
     // --- Main Application UI ---
     return (
-        // MAIN CONTAINER: Added md:flex to only use flex on medium screens and up (desktop)
-        <div className="min-h-screen bg-gray-50 font-sans md:flex">
-
-            {/* Hidden File Input for Data Upload */}
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileUpload} 
-                className="hidden" 
-                accept=".json"
-            />
+        <div className="flex min-h-screen bg-gray-50 print:block">
             
-            {/* Hidden File Input for Logo Upload */}
-            <input 
-                type="file" 
-                ref={logoInputRef} 
-                onChange={handleLogoUpload} 
-                className="hidden" 
-                accept="image/*"
-            />
-
-            {/* Modal Message */}
             <ModalMessage 
-                message={modalMessage} 
-                isVisible={isModalVisible} 
-                onClose={closeModal} 
+                message={modal.message} 
+                isVisible={modal.isVisible} 
+                onClose={() => setModal({ isVisible: false, message: '' })} 
                 primaryColor={brandingSettings.primaryColor}
             />
 
-            {/* Backdrop for Mobile Sidebar */}
-            {isSidebarOpen && (
-                <div 
-                    className="fixed inset-0 bg-black opacity-50 z-30 md:hidden" 
-                    onClick={() => setIsSidebarOpen(false)}
-                />
-            )}
-            
-            {/* Branding Settings Panel (MODAL) - UPDATED FOR CENTERING AND BLUR */}
+            {/* Branding Settings Modal */}
             {isBrandingSettingsOpen && (
-                // Centered and Blurred Backdrop
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-40 print:hidden backdrop-blur-sm">
-                    {/* Responsive size adjustment */}
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 print:hidden">
+                    {/* Max width and size adjustment */}
                     <div className="p-4 rounded-lg shadow-2xl bg-white ring-1 ring-black ring-opacity-5 z-20 max-h-[90vh] overflow-y-auto w-11/12 max-w-lg">
                         <h4 className="text-sm font-bold text-gray-700 mb-4 border-b pb-1">Customize Branding</h4>
-
+                        
                         {/* 1. Company Name */}
                         <div className="mb-4">
                             <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
                                 <User2 size={14} className='mr-1' /> Company Name:
                             </label>
-                            <input
-                                type="text"
-                                value={brandingSettings.companyName}
+                            <input 
+                                type="text" 
+                                value={brandingSettings.companyName} 
                                 onChange={(e) => handleBrandingChange('companyName', e.target.value)}
                                 // REPLACED hardcoded focus border color with inline style
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             />
                         </div>
-
+                        
                         {/* 2. Logo Upload/URL */}
                         <div className="mb-4 border-t pt-4">
                             <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
                                 <ImageIcon size={14} className='mr-1' /> Logo Upload:
                             </label>
                             <div className='flex space-x-2 items-center'>
-                                <button
+                                <button 
                                     // REPLACED hardcoded background color with inline style
-                                    onClick={handleLogoUploadClick}
+                                    onClick={handleLogoUploadClick} 
                                     className='shrink-0 text-white py-1 px-3 rounded-lg text-sm hover:opacity-80 transition'
                                     style={{ backgroundColor: brandingSettings.primaryColor }}
                                 >
@@ -1564,69 +1450,132 @@ const App = () => {
                                 </button>
                                 <img src={brandingSettings.logoUrl} alt="Current Logo" className='w-12 h-12 object-contain border rounded' />
                             </div>
+                            <input 
+                                type="file" 
+                                ref={logoInputRef} 
+                                onChange={handleLogoFileUpload} 
+                                className="hidden" 
+                                accept="image/*"
+                            />
                             <label className="block text-xs font-semibold text-gray-700 mt-3 mb-1">Logo URL / Base64:</label>
-                            <textarea
-                                value={brandingSettings.logoUrl}
+                            <textarea 
+                                value={brandingSettings.logoUrl} 
                                 onChange={(e) => handleBrandingChange('logoUrl', e.target.value)}
                                 // REPLACED hardcoded focus border color with inline style
                                 className="w-full p-2 border border-gray-300 rounded-lg text-xs h-16 resize-none focus:ring-1 focus:border-1"
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                placeholder="Paste Image URL or Base64 string here..."
+                                placeholder="Paste Image URL or Base64 content here..."
                             />
                         </div>
-                        
-                        {/* NEW: Company Contact Details */}
+
+                        {/* 3. Company Info Details (address, phone, email, vatNo) - Grid Layout */}
                         <div className="mb-4 border-t pt-4">
-                             <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Company Contact Info</h4>
-                             
-                             {Object.entries(brandingSettings.companyInfo).map(([key, value]) => (
-                                <div key={key} className="mb-2">
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1')}:</label>
+                             <h5 className="text-xs font-bold text-gray-700 mb-2">Company Information</h5>
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                                {Object.entries(brandingSettings.companyInfo).map(([key, value]) => (
+                                    <div key={key}>
+                                        <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1')}:</label>
+                                        <input
+                                            type="text"
+                                            value={value}
+                                            onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', key, e.target.value)}
+                                            className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                            style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 4. Payment Details Section (New Addition) */}
+                        <div className="mb-4 border-t pt-4">
+                             <h5 className="text-xs font-bold text-gray-700 mb-2">Payment Details (Editable Footer Info)</h5>
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                                {/* Account Holder */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Account Holder:</label>
                                     <input
                                         type="text"
-                                        value={value}
-                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', key, e.target.value)}
-                                        // REPLACED hardcoded focus border color with inline style
-                                        className="w-full p-1 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                        value={brandingSettings.paymentDetails.accountHolder}
+                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountHolder', e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
                                         style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                                     />
                                 </div>
-                             ))}
+                                {/* Bank Name */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Bank Name:</label>
+                                    <input
+                                        type="text"
+                                        value={brandingSettings.paymentDetails.bankName}
+                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'bankName', e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                                    />
+                                </div>
+                                {/* Account Number */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Account Number:</label>
+                                    <input
+                                        type="text"
+                                        value={brandingSettings.paymentDetails.accountNumber}
+                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountNumber', e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                                    />
+                                </div>
+                                {/* Payment Note */}
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Payment Note:</label>
+                                    <input
+                                        type="text"
+                                        value={brandingSettings.paymentDetails.paymentNote}
+                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'paymentNote', e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        
-                        {/* NEW: Default Template Selector */}
+
+
+                        {/* 5. Template Selection (Default) - UPDATED TO USE 6 OPTIONS */}
                         <div className="mb-4 border-t pt-4">
-                            <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Default Document Template</h4>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">Default Template for New Documents:</label>
-                            <select
+                            <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
+                                <Layout size={14} className='mr-1' /> Default Document Template:
+                            </label>
+                            <select 
                                 value={brandingSettings.defaultTemplateStyle}
                                 onChange={(e) => handleBrandingChange('defaultTemplateStyle', e.target.value)}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             >
-                                <option value="StyleA">Style A (Formal)</option>
-                                <option value="StyleB">Style B (Simple)</option>
-                                {/* Add new templates here */}
+                                {TemplateOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}
+                                    </option>
+                                ))}
                             </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {TemplateOptions.find(o => o.id === brandingSettings.defaultTemplateStyle)?.description || 'Select a template style.'}
+                            </p>
                         </div>
 
-
-                        {/* 3. Color Settings */}
-                        <div className='border-t pt-4'>
-                            <h4 className="text-sm font-bold text-gray-700 mb-3 border-b pb-1">Colors</h4>
-                            <div className="mb-3">
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Primary Color (Headers, Borders):</label>
+                        {/* 6. Color Pickers */}
+                        <div className="flex space-x-4 border-t pt-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Primary Color (Headers/Main):</label>
                                 <div className="flex items-center space-x-2">
-                                    <input
-                                        type="color"
-                                        value={brandingSettings.primaryColor}
-                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
-                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer"
+                                    <input 
+                                        type="color" 
+                                        value={brandingSettings.primaryColor} 
+                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)} 
+                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer" 
                                     />
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.primaryColor}
-                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
+                                    <input 
+                                        type="text" 
+                                        value={brandingSettings.primaryColor} 
+                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)} 
                                         // REPLACED hardcoded focus border color with inline style
                                         className="flex-1 p-1 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
                                         style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
@@ -1636,16 +1585,16 @@ const App = () => {
                             <div>
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">Accent Color (Logo/Highlight):</label>
                                 <div className="flex items-center space-x-2">
-                                    <input
-                                        type="color"
-                                        value={brandingSettings.accentColor}
-                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)}
-                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer"
+                                    <input 
+                                        type="color" 
+                                        value={brandingSettings.accentColor} 
+                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)} 
+                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer" 
                                     />
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.accentColor}
-                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)}
+                                    <input 
+                                        type="text" 
+                                        value={brandingSettings.accentColor} 
+                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)} 
                                         // REPLACED hardcoded focus border color with inline style
                                         className="flex-1 p-1 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
                                         style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
@@ -1665,67 +1614,80 @@ const App = () => {
                 </div>
             )}
 
+
             {/* 1. SIDEBAR NAVIGATION - UPDATED FOR RESPONSIVENESS AND COUNTS */}
             <div 
                 // Conditional classes for mobile sidebar overlay vs. desktop fixed sidebar
-                className={`w-64 p-4 flex-shrink-0 flex-col shadow-xl print:hidden 
-                    ${isSidebarOpen ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden md:flex'}`
-                } 
+                className={`w-64 p-4 flex-shrink-0 flex-col shadow-xl print:hidden ${isSidebarOpen ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden md:flex'}` }
                 style={{ backgroundColor: brandingSettings.primaryColor }}
             >
                 
-                {/* Logo/Title & Close Button on Mobile */}
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-xl font-bold text-white uppercase tracking-wider">
+                {/* Mobile Close Button */}
+                <button 
+                    onClick={() => setIsSidebarOpen(false)} 
+                    className="md:hidden absolute top-4 right-4 text-white hover:opacity-80 z-50"
+                >
+                    <X size={24} />
+                </button>
+
+                {/* Logo/Title */}
+                <div className="mb-6 pt-2 pb-4 border-b border-white/20">
+                    <h1 className="text-xl font-bold text-white">
                         {brandingSettings.companyName.split(' ')[0]} 
-                        <span style={{ color: brandingSettings.accentColor }}>{brandingSettings.companyName.split(' ').slice(1).join(' ')}</span>
+                        <span style={{ color: brandingSettings.accentColor }}> 
+                            {brandingSettings.companyName.split(' ').slice(1).join(' ')}
+                        </span>
                     </h1>
-                    <button 
-                        onClick={() => setIsSidebarOpen(false)} 
-                        className="p-1 rounded-full text-white md:hidden hover:bg-white/20"
-                    >
-                        <X size={24} />
-                    </button>
+                    <p className='text-xs text-white/70'>Finance Manager</p>
                 </div>
 
-                {/* Main Navigation - Document Types (UPDATED WITH COUNTS) */}
-                <nav className="space-y-2">
+                {/* Primary Navigation - Document Types */}
+                <nav className="space-y-1">
                     {navItems.map(item => (
-                        <button
+                        <div 
                             key={item.title}
-                            onClick={() => {setSectionTitle(item.title); setIsSidebarOpen(false); }} // Close on selection
-                            // Added 'justify-between' to align text left and count right
-                            className={`w-full text-left flex items-center p-2 text-sm font-medium rounded-lg transition duration-150 justify-between
-                                ${sectionTitle === item.title 
-                                    ? `bg-white text-gray-800 shadow-md` 
-                                    : `text-white hover:bg-white/20`}`
-                            }
+                            onClick={() => {
+                                setSectionTitle(item.title);
+                                setSearchQuery(''); // Clear search when switching sections
+                                setIsSidebarOpen(false); // Close sidebar on mobile after selection
+                            }}
+                            // Dynamic background color for selected section
+                            className={`flex items-center p-3 text-sm font-medium rounded-lg transition duration-150 cursor-pointer ${
+                                sectionTitle === item.title 
+                                    ? 'text-gray-900 shadow-md'
+                                    : 'text-white/90 hover:bg-white/20'
+                            }`}
+                            style={sectionTitle === item.title ? { backgroundColor: 'white' } : {}}
                         >
-                            <span className='flex items-center'>
-                                {item.title === 'Invoices' && <DollarSign size={16} className="mr-3" />}
-                                {item.title === 'Quotations' && <FileText size={16} className="mr-3" />}
-                                {item.title === 'Receipts' && <Save size={16} className="mr-3" />}
-                                {item.title === 'Customers' && <Users size={16} className="mr-3" />}
+                            <item.icon 
+                                size={20} 
+                                className="mr-3" 
+                                // Dynamic icon color for selected section
+                                style={sectionTitle === item.title ? { color: brandingSettings.primaryColor } : { color: 'white' }}
+                            />
+                            <span className="flex-1">
                                 {item.title}
                             </span>
-                            {/* Count Badge - Dynamic colors based on selection state */}
+                            {/* Badge with Count */}
                             <span 
-                                className='px-2 py-0.5 rounded-full text-xs font-semibold'
-                                style={sectionTitle === item.title 
-                                        ? { backgroundColor: brandingSettings.primaryColor, color: 'white' }
-                                        : { backgroundColor: 'white', color: brandingSettings.primaryColor }}
+                                className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                    sectionTitle === item.title 
+                                        ? 'text-white' 
+                                        : 'bg-white text-gray-900'
+                                }`}
+                                style={sectionTitle === item.title ? { backgroundColor: brandingSettings.accentColor } : {}}
                             >
                                 {item.count}
                             </span>
-                        </button>
+                        </div>
                     ))}
                 </nav>
 
                 {/* Search Bar for Documents/Customers */}
                 <div className="mt-6 mb-4 relative">
                     <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
+                    <input 
+                        type="text" 
                         placeholder={`Search ${sectionTitle.toLowerCase()}...`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -1735,7 +1697,6 @@ const App = () => {
                 
                 {/* Secondary Navigation - Document List / Customer List (Removed redundant count badge from Customers header) */}
                 <nav className="flex-1 overflow-y-auto space-y-4 pr-1 text-white/90">
-                    
                     {/* List of documents/customers */}
                     {sectionTitle === 'Customers' ? (
                         // Customer List View
@@ -1745,10 +1706,24 @@ const App = () => {
                                 CUSTOMERS
                             </h3>
                             <div className="space-y-1 pl-4">
-                                {getFilteredDocs('Customers').filter(c => 
-                                    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.company.toLowerCase().includes(searchQuery.toLowerCase())
-                                ).map(customer => (
-                                    <div key={customer.id} className="block p-1 text-xs rounded-lg transition duration-100 hover:bg-white/10" title={customer.company}>
+                                {getFilteredDocs('Customers')
+                                    .filter(c => 
+                                        c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                        c.company.toLowerCase().includes(searchQuery.toLowerCase())
+                                    )
+                                    .map(customer => (
+                                    <div 
+                                        key={customer.id} 
+                                        className="block p-1 text-xs rounded-lg transition duration-100 hover:bg-white/10"
+                                        title={customer.company}
+                                        onClick={() => {
+                                            // Create a dummy document to view the customer details in the editor if needed
+                                            setCurrentDoc(initialData('Invoice', null, brandingSettings.defaultTemplateStyle));
+                                            handleSelectCustomer(customer.id);
+                                            setIsEditable(false);
+                                            setIsSidebarOpen(false);
+                                        }}
+                                    >
                                         <p className='font-bold'>{customer.name}</p>
                                         <p className='text-white/70'>{customer.company}</p>
                                     </div>
@@ -1759,47 +1734,35 @@ const App = () => {
                         // Document List View
                         ['Invoices', 'Quotations', 'Receipts'].map(title => {
                             // Filter the ledger based on the section title
-                            const filteredDocs = getFilteredDocs(title).filter(doc => 
-                                // Simple search filter by document number, customer company, or name
-                                doc.documentDetails.docNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                doc.clientDetails.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                doc.clientDetails.name.toLowerCase().includes(searchQuery.toLowerCase())
-                            );
+                            if (title !== sectionTitle) return null; // Only show the current section
                             
-                            // Only show section if it's the current selected section OR if the search query is active
-                            const shouldShowSection = title === sectionTitle || searchQuery.length > 0;
-
-                            if (!shouldShowSection) return null;
+                            const filteredDocs = getFilteredDocs(title)
+                                .filter(doc => 
+                                    // Simple search filter by document number, customer company, or name
+                                    doc.documentDetails.docNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    doc.clientDetails.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    doc.clientDetails.name.toLowerCase().includes(searchQuery.toLowerCase())
+                                );
 
                             return (
                                 <div key={title}>
-                                    {/* Section Header with Count (uses filter count for search context) */}
                                     <h3 className="flex items-center p-2 text-sm font-bold uppercase border-b border-white/20 mb-1">
                                         {title}
-                                        {/* Show filtered count */}
-                                        <span className="ml-auto text-xs font-semibold bg-white px-2 py-0.5 rounded-full" style={{ color: brandingSettings.primaryColor }}>
-                                            {filteredDocs.length}
-                                        </span>
                                     </h3>
-                                    {/* List of Documents in this Section */}
                                     <div className="space-y-1 pl-4">
-                                        {filteredDocs.length === 0 ? (
-                                            <p className="text-xs italic text-white/70 p-2">No documents match the filter.</p>
-                                        ) : (
+                                        {filteredDocs.length > 0 ? (
                                             filteredDocs.map(doc => (
-                                                <a 
+                                                <div 
                                                     key={doc.id} 
-                                                    href="#" 
-                                                    onClick={() => handleSelectDocument(doc.id)}
-                                                    // Highlight the currently selected document
-                                                    // REPLACED hardcoded text color with inline style
-                                                    className={`block p-1 text-xs rounded-lg transition duration-100 ${currentDoc.id === doc.id ? 'bg-white font-bold' : 'hover:bg-white/10'}`}
-                                                    style={currentDoc.id === doc.id ? { color: brandingSettings.primaryColor } : {}}
-                                                    title={`Load ${doc.documentDetails.docNo}`}
+                                                    className={`block p-1 text-xs rounded-lg transition duration-100 hover:bg-white/10 cursor-pointer ${currentDoc.id === doc.id ? 'bg-white/30' : ''}`}
+                                                    onClick={() => loadDocumentFromLedger(doc.id)}
                                                 >
-                                                    {doc.documentDetails.docNo} - {formatCurrency(doc.totals.totalDue)}
-                                                </a>
+                                                    <p className='font-bold'>{doc.documentDetails.docNo}</p>
+                                                    <p className='text-white/70'>{doc.clientDetails.company} - {doc.clientDetails.name}</p>
+                                                </div>
                                             ))
+                                        ) : (
+                                            <p className='p-2 text-xs text-white/50'>No {title.toLowerCase()} found.</p>
                                         )}
                                     </div>
                                 </div>
@@ -1808,10 +1771,10 @@ const App = () => {
                     )}
                 </nav>
 
-                {/* Settings/Logout */}
-                <div className="pt-4 mt-auto border-t border-white/20">
+                {/* Footer Controls */}
+                <div className="mt-auto pt-4 border-t border-white/20 space-y-2">
                     {/* Display User ID */}
-                    <div className="mb-3 p-2 text-xs font-mono break-all bg-white/10 rounded-lg">
+                    <div className="text-white/70 text-xs p-2 break-all bg-white/10 rounded-lg">
                         <span className="font-semibold block mb-1">Current User ID:</span>
                         {userId}
                     </div>
@@ -1821,22 +1784,20 @@ const App = () => {
                         onMouseEnter={() => setIsEditButtonHovered(true)} // ADDED: Set hover state to true
                         onMouseLeave={() => setIsEditButtonHovered(false)} // ADDED: Set hover state to false
                         // UPDATED: Dynamic classes for background hover effect when active
-                        className={`w-full flex items-center p-2 text-sm font-medium rounded-lg transition duration-150
-                            ${isEditable ? 'shadow-md hover:bg-gray-100' : ''}` // Added hover:bg-gray-100 for visual feedback when active
+                        className={`w-full flex items-center p-2 text-sm font-medium rounded-lg transition duration-150 ${isEditable ? 'shadow-md hover:bg-gray-100' : ''}` // Added hover:bg-gray-100 for visual feedback when active
                         }
                         style={
-                            isEditable 
-                                // Active State (Editing ENABLED)
-                                ? {
-                                    backgroundColor: 'white', 
-                                    color: brandingSettings.primaryColor, 
-                                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                                } 
-                                // Inactive State (Editing DISABLED) - Handles hover to change text/bg color
-                                : {
-                                    backgroundColor: isEditButtonHovered ? 'white' : 'transparent',
-                                    color: isEditButtonHovered ? brandingSettings.primaryColor : 'white', 
-                                }
+                            isEditable // Active State (Editing ENABLED)
+                            ? { 
+                                backgroundColor: 'white', 
+                                color: brandingSettings.primaryColor, 
+                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                            }
+                            // Inactive State (Editing DISABLED) - Handles hover to change text/bg color
+                            : { 
+                                backgroundColor: isEditButtonHovered ? 'white' : 'transparent', 
+                                color: isEditButtonHovered ? brandingSettings.primaryColor : 'white',
+                            }
                         }
                     >
                         <Edit size={16} className="mr-3" /> 
@@ -1849,7 +1810,7 @@ const App = () => {
                     >
                         <Settings size={16} className="mr-3" /> Branding Settings
                     </button>
-
+                    
                     <button 
                         onClick={handleLogout} 
                         className="w-full flex items-center p-2 mt-2 text-sm font-medium text-white rounded-lg hover:bg-white/20 transition duration-150"
@@ -1863,153 +1824,135 @@ const App = () => {
             <main className="flex flex-col grow min-h-screen">
                 
                 {/* 3. TOOLBAR - UPDATED FOR RESPONSIVENESS */}
-                <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-white shadow-sm print:hidden">
+                <div className="shrink-0 p-4 bg-white shadow-md flex justify-between items-center print:hidden">
                     
-                    {/* Main Toolbar Flex Container */}
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-3 md:space-y-0">
-                        
-                        {/* LEFT: Menu Button (Mobile) and New Document/Status Buttons */}
-                        <div className="flex flex-wrap gap-2 md:space-x-4 items-center">
-                             {/* Mobile Menu Button */}
+                    {/* Mobile Menu Button */}
+                    <button 
+                        onClick={() => setIsSidebarOpen(true)} 
+                        className="md:hidden text-gray-700 hover:text-gray-900 transition mr-4"
+                    >
+                        <Menu size={24} />
+                    </button>
+
+                    {/* Left Section (Current Document Info) */}
+                    <div className='flex items-center space-x-4 flex-1 overflow-hidden'>
+                        {/* REPLACED hardcoded text color with inline style */}
+                        <h2 className="text-xl font-bold uppercase truncate" style={{ color: brandingSettings.primaryColor }}>
+                            {currentDoc.documentType} 
+                            <span className='font-normal text-gray-500 text-sm ml-2'>
+                                {currentDoc.documentDetails.docNo.includes('TEMP') ? '(Draft)' : currentDoc.documentDetails.docNo}
+                            </span>
+                        </h2>
+
+                        {/* Status Badge */}
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap hidden sm:block ${
+                            currentDoc.status === 'Paid' ? 'bg-green-100 text-green-700' :
+                            currentDoc.status === 'Outstanding' ? 'bg-red-100 text-red-700' :
+                            currentDoc.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                        }`}>
+                            {currentDoc.status}
+                        </span>
+                    </div>
+
+                    {/* Right Section (Actions) - Made responsive with hidden/show on small screens */}
+                    <div className="flex items-center space-x-2 shrink-0">
+
+                        {/* Save Button (Conditional) */}
+                        {isEditable && (
                             <button 
-                                onClick={() => setIsSidebarOpen(true)}
+                                onClick={saveCurrentDocument}
                                 // REPLACED hardcoded background color with inline style
-                                className="md:hidden flex items-center text-white py-2 px-3 rounded-lg font-semibold hover:opacity-90 transition shadow-md"
-                                style={{ backgroundColor: brandingSettings.primaryColor }}
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md text-sm"
+                                style={{ backgroundColor: brandingSettings.primaryColor, hover: { opacity: 0.9 } }}
                             >
-                                <Menu size={20} />
+                                <Save size={16} className="mr-2 hidden sm:block" /> Save
                             </button>
-                            
-                            {/* New Document Dropdown */}
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setIsDropdownOpen(prev => !prev)}
-                                    // REPLACED hardcoded background color with inline style
-                                    className="flex items-center text-white py-2 px-4 rounded-lg font-semibold hover:opacity-90 transition shadow-md"
-                                    style={{ backgroundColor: brandingSettings.primaryColor }}
-                                >
-                                    <Plus size={20} className="mr-2 hidden sm:block" /> New <ChevronDown size={16} className="ml-1" />
-                                </button>
-                                {isDropdownOpen && (
-                                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-20">
-                                        <button 
-                                            onClick={() => createNewDocument('Invoice')} 
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
-                                        >
-                                            <FileText size={16} className="inline mr-2" /> New Invoice
-                                        </button>
-                                        <button 
-                                            onClick={() => createNewDocument('Quotation')} 
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-                                        >
-                                            <FileText size={16} className="inline mr-2" /> New Quotation
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                        )}
 
-                            {/* Approve Quotation Button (Conditional) */}
-                            {currentDoc.documentType === 'Quotation' && currentDoc.status === 'Pending' && (
-                                <button
-                                    onClick={handleApproveQuotation}
-                                    className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-green-500 hover:bg-green-600 text-sm"
-                                >
-                                    <Save size={16} className="mr-2 hidden sm:block" /> Approve
-                                </button>
+                        {/* New Document Dropdown */}
+                        <div className="relative">
+                            <button 
+                                onClick={() => setIsDropdownOpen(prev => !prev)} 
+                                className="flex items-center text-gray-700 bg-gray-100 py-2 px-4 rounded-lg font-semibold transition hover:bg-gray-200 text-sm"
+                            >
+                                <Plus size={16} className="mr-2 hidden sm:block" /> New
+                                <ChevronDown size={16} className="ml-1" />
+                            </button>
+                            {isDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-30">
+                                    <button 
+                                        onClick={() => createNewDocument('Invoice')} 
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                                    >
+                                        <FileText size={16} className="inline mr-2" /> New Invoice
+                                    </button>
+                                    <button 
+                                        onClick={() => createNewDocument('Quotation')} 
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+                                    >
+                                        <FileText size={16} className="inline mr-2" /> New Quotation
+                                    </button>
+                                </div>
                             )}
-                            
-                            {/* Mark as Paid Button (Conditional) */}
-                            {currentDoc.documentType === 'Invoice' && currentDoc.status === 'Outstanding' && (
-                                <button
-                                    onClick={markAsPaid}
-                                    className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-yellow-600 hover:bg-yellow-700 text-sm"
-                                >
-                                    <DollarSign size={16} className="mr-2 hidden sm:block" /> Mark Paid
-                                </button>
-                            )}
-
-                             {/* Template Selector Dropdown */}
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setIsTemplateSelectorOpen(prev => !prev)}
-                                    className="flex items-center text-gray-700 py-2 px-4 rounded-lg font-semibold hover:bg-gray-100 transition shadow-sm border text-sm"
-                                >
-                                    <Layout size={16} className="mr-2 hidden sm:block" /> {currentDoc.templateStyle.replace('Style', 'S.')} <ChevronDown size={16} className="ml-1" />
-                                </button>
-                                {isTemplateSelectorOpen && (
-                                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 z-20">
-                                        <button 
-                                            onClick={() => { handleTemplateDetailChange('documentDetails', 'templateStyle', 'StyleA'); setIsTemplateSelectorOpen(false); }} 
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
-                                        >
-                                            <Layout size={16} className="inline mr-2" /> Style A (Formal)
-                                        </button>
-                                        <button 
-                                            onClick={() => { handleTemplateDetailChange('documentDetails', 'templateStyle', 'StyleB'); setIsTemplateSelectorOpen(false); }} 
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-                                        >
-                                            <Layout size={16} className="inline mr-2" /> Style B (Simple)
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
                         </div>
-
-                        {/* RIGHT: Status, ID, Save, Print, Data Buttons */}
-                        <div className="flex flex-wrap gap-2 md:space-x-3 items-center">
-                            {/* Document Status */}
-                            <span 
-                                className={`text-xs font-bold px-3 py-1 rounded-full ${
-                                    currentDoc.status === 'Outstanding' ? 'bg-red-100 text-red-700' :
-                                    currentDoc.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                    currentDoc.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                                    'bg-gray-100 text-gray-700'
-                                }`}
-                            >
-                                {currentDoc.status.toUpperCase()}
-                            </span>
-
-                            {/* Document ID / Name - Hidden on small screen for space */}
-                            <span className='hidden sm:block text-sm text-gray-500 font-mono'>
-                                {currentDoc.documentDetails.docNo}
-                            </span>
-                            
-                            {/* Save Button */}
-                            <button
-                                onClick={handleSaveDocument}
-                                className="flex items-center text-white py-2 px-3 rounded-lg font-semibold transition shadow-md bg-gray-700 hover:bg-gray-900 text-sm"
-                            >
-                                <Save size={20} className="mr-1 sm:mr-2" /> <span className="hidden sm:inline">Save</span>
-                            </button>
-                            
-                            {/* Print Button */}
+                        
+                        {/* Approve Quotation Button (Conditional) */}
+                        {currentDoc.documentType === 'Quotation' && currentDoc.status === 'Pending' && (
                             <button 
-                                onClick={() => window.print()} 
-                                className="flex items-center py-2 px-3 rounded-lg font-semibold transition shadow-md text-sm"
-                                // REPLACED hardcoded background color with inline style
-                                style={{ backgroundColor: brandingSettings.accentColor, color: brandingSettings.primaryColor }}
+                                onClick={handleApproveQuotation} 
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-green-500 hover:bg-green-600 text-sm"
                             >
-                                <FileText size={20} className="mr-1 sm:mr-2" /> <span className="hidden sm:inline">Print</span>
+                                <Save size={16} className="mr-2 hidden sm:block" /> Approve
+                            </button>
+                        )}
+                        
+                        {/* Mark as Paid Button (Conditional) */}
+                        {currentDoc.documentType === 'Invoice' && currentDoc.status === 'Outstanding' && (
+                            <button 
+                                onClick={markAsPaid} 
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-yellow-600 hover:bg-yellow-700 text-sm"
+                            >
+                                <DollarSign size={16} className="mr-2 hidden sm:block" /> Mark Paid
+                            </button>
+                        )}
+
+
+                        {/* Print Button */}
+                        <button 
+                            onClick={() => window.print()} 
+                            // REPLACED hardcoded styles with inline styles
+                            className="flex items-center py-2 px-4 rounded-lg font-semibold transition hover:opacity-90 text-sm"
+                            style={{ backgroundColor: brandingSettings.accentColor, color: brandingSettings.primaryColor }}
+                        >
+                            <FileText size={20} className="mr-1 sm:mr-2" /> 
+                            <span className="hidden sm:inline">Print</span>
+                        </button>
+                        
+                        {/* Download/Upload Data Buttons */}
+                        <div className='flex space-x-2'>
+                            <button 
+                                title="Download Data Backup" 
+                                onClick={handleDownloadData} 
+                                className="p-2 text-gray-700 hover:text-green-600 bg-gray-100 rounded-full transition shadow-inner"
+                            >
+                                <Download size={20} />
                             </button>
                             
-                            {/* Download/Upload Data Buttons */}
-                            <div className='flex space-x-2'>
-                                <button 
-                                    title="Download Data Backup" 
-                                    onClick={handleDownloadData} 
-                                    className="p-2 text-gray-700 hover:text-green-600 bg-gray-100 rounded-full transition shadow-inner"
-                                >
-                                <Download size={20} />
-                                </button>
-                                {/* MODIFIED: Added onClick handler to handleUploadClick */}
-                                <button 
-                                    title="Upload Data Restore" 
-                                    onClick={handleUploadClick} 
-                                    className="p-2 text-gray-700 hover:text-red-600 bg-gray-100 rounded-full transition shadow-inner"
-                                >
-                                <Upload size={20} />
-                                </button>
-                            </div>
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleFileUpload} 
+                                className="hidden" 
+                                accept="application/json"
+                            />
+                            <button 
+                                title="Upload Data Restore" 
+                                onClick={handleUploadClick} 
+                                className="p-2 text-gray-700 hover:text-red-600 bg-gray-100 rounded-full transition shadow-inner"
+                            >
+                            <Upload size={20} />
+                            </button>
                         </div>
                     </div>
                 </div>
