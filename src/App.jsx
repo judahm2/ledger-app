@@ -29,10 +29,9 @@ const defaultBrandingSettings = {
     primaryColor: '#039dbf', // Revolit Blue
     accentColor: '#e9b318',  // Revolit Yellow
     companyName: 'REVOLIT SOLUTIONS',
-    // RENAMED from StyleA
-    defaultTemplateStyle: 'ModernStyle', 
+    defaultTemplateStyle: 'StyleA', // RENAMED
     // Using a default Base64 or external URL for initial state
-    logoUrl: "https://", 
+    logoUrl: "https://image.url", 
     // NEW: Editable Company Info
     companyInfo: {
         address: 'Address',
@@ -44,7 +43,7 @@ const defaultBrandingSettings = {
     paymentDetails: {
         accountHolder: 'REVOLIT SOLUTIONS', // Updated key
         bankName: 'FNB', // New key
-        accountNumber: '0000000', // Updated key
+        accountNumber: '00000000', // Updated key
         paymentNote: 'Payment must be made in full before the due date.',
     },
     contactDetails: {
@@ -57,16 +56,15 @@ const defaultBrandingSettings = {
     templateBThankYou: 'Thank you for your business!',
 };
 
-// NEW: Template Options for Selector (defines 6 templates with unique names)
+// MODIFIED: Template Options for Selector (defines 7 templates with unique names)
 const TemplateOptions = [
-    // Map existing components to new names
-    { id: 'ModernStyle', name: 'Modern Style (Default)', description: 'The structured Revolit invoice layout.' },
-    { id: 'SimpleStyle', name: 'Simple Style (Minimal)', description: 'A clean, modern layout with minimal borders.' },
-    // Placeholder names for future templates (C, D, E, F)
-    { id: 'StyleC', name: 'Professional (Monochrome)', description: 'A simple, black-and-white professional look.' },
-    { id: 'StyleD', name: 'Vibrant (Modern)', description: 'A bold, modern design with full-width color sections.' },
-    { id: 'StyleE', name: 'Formal (Detailed)', description: 'Focus on clear data presentation and legal details.' },
-    { id: 'StyleF', name: 'Compact (Quick View)', description: 'A condensed view for quick, smaller transactions.' },
+    { id: 'StyleA', name: 'Style A (Structured)', description: 'Classic Revolit layout with accent color boxes.' },
+    { id: 'StyleB', name: 'Style B (Minimal)', description: 'Clean layout with a heavy bottom border.' },
+    { id: 'StyleC', name: 'Style C (Monotone)', description: 'High contrast, black and white, professional lines.' },
+    { id: 'StyleD', name: 'Style D (Vibrant Bar)', description: 'Full-height primary color sidebar.' },
+    { id: 'StyleE', name: 'Style E (Solid Header)', description: 'Full-width primary color solid header block.' },
+    { id: 'StyleF', name: 'Style F (Compact)', description: 'A condensed view for smaller transactions (Minimal look).' }, // Maps to Style B
+    { id: 'StyleG', name: 'Style G (Corporate)', description: 'A simple, black-and-white professional look (Structured look).' }, // Maps to Style A
 ];
 
 // MODIFIED: Accepts the sequential number as an argument and pads it.
@@ -106,7 +104,7 @@ const initialClient = {
 };
 
 // MODIFIED: Accepts defaultTemplate parameter and uses it
-const initialData = (docType = 'Invoice', id = null, defaultTemplate = 'ModernStyle') => ({ // RENAMED default template to 'ModernStyle'
+const initialData = (docType = 'Invoice', id = null, defaultTemplate = 'StyleA') => ({ // RENAMED default template to 'StyleA'
   // Use the generated ID for new documents, or a temporary ID for the current editor state
   id: id || `TEMP-${Date.now()}`, 
   documentType: docType, // 'Invoice', 'Quotation', 'Receipt'
@@ -145,9 +143,9 @@ const sampleLedger = [
     {
         ...initialData('Invoice', 'RS-2025-12-09-001'),
         status: 'Outstanding',
-        templateStyle: 'ModernStyle', // Set default template style
+        templateStyle: 'StyleA', // Set default template style
         // Date is used for cycle counting: December 2025 is in the 2025 cycle
-        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-001', date: '2025-12-05', isPaid: false, stampText: '' },
+        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-05-001', date: '2025-12-05', isPaid: false, stampText: '' },
         clientDetails: tempSampleCustomers[0],
         totals: { subtotal: 500.00, taxRate: 15, tax: 75.00, totalDue: 575.00 },
         lineItems: [{ description: 'Annual Subscription', qty: 1, unitPrice: 500.00, amount: 500.00 }],
@@ -155,8 +153,8 @@ const sampleLedger = [
     {
         ...initialData('Quotation', 'RS-2025-12-09-002'),
         status: 'Pending',
-        templateStyle: 'ModernStyle', // Set default template style
-        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-002', date: '2025-12-08', isPaid: false, stampText: '' },
+        templateStyle: 'StyleB', // Set Style B for one sample
+        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-08-002', date: '2025-12-08', isPaid: false, stampText: '' },
         clientDetails: tempSampleCustomers[1],
         totals: { subtotal: 1200.00, taxRate: 15, tax: 180.00, totalDue: 1380.00 },
         lineItems: [{ description: 'Consulting Services', qty: 10, unitPrice: 120.00, amount: 1200.00 }],
@@ -164,8 +162,8 @@ const sampleLedger = [
     {
         ...initialData('Receipt', 'RS-2025-12-09-003'),
         status: 'Paid',
-        templateStyle: 'ModernStyle', // Set default template style
-        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-09-003', date: '2025-12-01', isPaid: true, stampText: 'PAID' },
+        templateStyle: 'StyleA', // Set default template style
+        documentDetails: { ...initialData().documentDetails, docNo: 'RS-2025-12-01-003', date: '2025-12-01', isPaid: true, stampText: 'PAID' },
         clientDetails: tempSampleCustomers[2],
         totals: { subtotal: 300.00, taxRate: 15, tax: 45.00, totalDue: 345.00 },
         lineItems: [{ description: 'Website Maintenance', qty: 3, unitPrice: 100.00, amount: 300.00 }],
@@ -239,16 +237,29 @@ const ModalMessage = ({ message, isVisible, onClose, primaryColor }) => {
 
 // Component for the Client Info
 // MODIFIED: Accepts brandingSettings (which contains colors)
-const ClientDetailsBlock = ({ details, isEditable, onDetailChange, customers, onSelectCustomer, brandingSettings }) => {
+const ClientDetailsBlock = ({ details, isEditable, onDetailChange, customers, onSelectCustomer, brandingSettings, style = 'modern' }) => {
     const { primaryColor } = brandingSettings;
     // Determine if the current customer is one of the pre-loaded ones
     const isPreloadedCustomer = customers.some(c => c.id === details.id && details.id !== 'NEW-CLIENT');
     
+    // Determine block style
+    const blockClassName = style === 'minimal' 
+        ? "p-0 mb-4" // Simple, no border/background
+        : style === 'monotone'
+        ? "p-4 mb-4 border-l-4 border-gray-900 bg-gray-50/50 rounded-r-lg" // Dark border for monotone
+        : "p-4 mb-4 border-l-4 bg-gray-50/50 rounded-r-lg"; // Default modern style
+
+    const blockStyle = style === 'minimal' 
+        ? {} 
+        : style === 'monotone'
+        ? { borderLeftColor: '#000' }
+        : { borderLeftColor: primaryColor };
+    
+    const titleStyle = style === 'monotone' ? { color: '#000' } : { color: primaryColor };
+
     return (
-        // REPLACED hardcoded border color with inline style
-        <div className="mb-4 p-4 border-l-4 bg-gray-50/50 rounded-r-lg" style={{ borderLeftColor: primaryColor }}>
-            {/* REPLACED hardcoded text color with inline style */}
-            <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Bill To</h3>
+        <div className={blockClassName} style={blockStyle}>
+            <h3 className="text-sm font-bold mb-2 uppercase" style={titleStyle}>Bill To</h3>
 
             {/* Customer Selection Dropdown - HIDDEN ON PRINT */}
             <div className="mb-4 print:hidden">
@@ -302,20 +313,39 @@ const ClientDetailsBlock = ({ details, isEditable, onDetailChange, customers, on
 };
 
 // Component for Line Items Table
-// MODIFIED: Accepts brandingSettings (which contains colors)
-const LineItemsTable = ({ items, isEditable, onItemChange, onDeleteItem, onAddItem, brandingSettings }) => {
+// MODIFIED: Accepts brandingSettings (which contains colors) and style
+const LineItemsTable = ({ items, isEditable, onItemChange, onDeleteItem, onAddItem, brandingSettings, style = 'modern' }) => {
     const { primaryColor } = brandingSettings;
+    
+    // Conditional styles based on template style
+    let headerStyle = "px-4 py-3 text-left text-xs font-bold uppercase tracking-wider";
+    let tableHeaderClasses = '';
+    let tableHeaderInlineStyle = {};
+
+    if (style === 'simple' || style === 'monotone') {
+        // Minimal/Monotone: Light gray or white background
+        tableHeaderClasses = "text-gray-700 bg-gray-100 border-b-2 border-gray-300";
+        if (style === 'monotone') {
+            tableHeaderClasses = "text-gray-900 bg-white border-b-2 border-gray-900";
+        }
+    } else {
+        // Modern/Solid Header/Vibrant Bar: Primary Color background
+        tableHeaderClasses = "text-white";
+        tableHeaderInlineStyle = { backgroundColor: primaryColor };
+    }
+
     return (
       // REDUCED MARGIN: mb-8 -> mb-4
       <div className="mb-4 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-300 rounded-lg overflow-hidden">
-          {/* REPLACED hardcoded background color with inline style */}
-          <thead className="text-white" style={{ backgroundColor: primaryColor }}>
+          {/* Apply conditional header style */}
+          <thead className={tableHeaderClasses} style={tableHeaderInlineStyle}>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider w-1/2">DESCRIPTION</th>
-              <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider w-16">QTY</th>
-              <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider w-24">UNIT PRICE (R)</th>
-              <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider w-28">AMOUNT (R)</th>
+              {/* Removed rounded corners for simplicity in all styles, which is fine */}
+              <th className={`${headerStyle} w-1/2`}>DESCRIPTION</th>
+              <th className={`${headerStyle} text-center w-16`}>QTY</th>
+              <th className={`${headerStyle} text-right w-24`}>UNIT PRICE (R)</th>
+              <th className={`${headerStyle} text-right w-28`}>AMOUNT (R)</th>
               {isEditable && <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider w-12 print:hidden"></th>}
             </tr>
           </thead>
@@ -385,26 +415,28 @@ const LineItemsTable = ({ items, isEditable, onItemChange, onDeleteItem, onAddIt
     );
 };
 
-// Component for Totals Summary
+// Component for Totals Summary (USED BY MODERN STYLES)
 // MODIFIED: Accepts brandingSettings (which contains colors)
-const TotalsSummary = ({ totals, isEditable, onTotalChange, brandingSettings }) => {
+const TotalsSummary = ({ totals, isEditable, onTotalChange, brandingSettings, style = 'modern' }) => {
     const { primaryColor } = brandingSettings;
+    
+    // Monotone style uses black/gray only
+    const finalRowColor = style === 'monotone' ? '#000' : primaryColor;
+    const finalRowTextColor = style === 'monotone' ? 'text-gray-100' : 'text-white';
+    const totalBoxBorder = style === 'monotone' ? 'border-2 border-gray-900' : 'border-2 border-gray-300';
+
     return (
         <div className="flex justify-end">
-            <table className="w-80 border-2 border-gray-300 rounded-lg overflow-hidden">
+            <table className={`w-full sm:w-80 ${totalBoxBorder} rounded-lg overflow-hidden`}>
                 <tbody>
                     <tr className="border-t border-gray-200">
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-xs font-medium">SUBTOTAL</td>
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-right text-xs">{formatCurrency(totals.subtotal)}</td>
                     </tr>
                     <tr>
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-xs font-medium flex items-center">
                             TAX RATE (%)
                         </td>
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-right text-xs">
                             <input 
                                 type="number" 
@@ -412,22 +444,18 @@ const TotalsSummary = ({ totals, isEditable, onTotalChange, brandingSettings }) 
                                 onChange={(e) => isEditable && onTotalChange('taxRate', e.target.value)}
                                 // REPLACED hardcoded focus border color with inline style
                                 className={`w-12 text-xs text-gray-700 text-right p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:shadow-none`}
-                                style={isEditable ? { borderBottomColor: primaryColor } : {}}
+                                style={{ borderBottomColor: isEditable ? primaryColor : undefined }}
                                 readOnly={!isEditable}
                             />%
                         </td>
                     </tr>
                     <tr>
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-xs font-medium">TAX</td>
-                        {/* CHANGED: Reduced padding from p-2 to py-1 px-2, and font size from text-sm to text-xs */}
                         <td className="py-1 px-2 text-right text-xs">{formatCurrency(totals.tax)}</td>
                     </tr>
-                    {/* REPLACED hardcoded background color with inline style */}
-                    <tr className="text-white font-bold" style={{ backgroundColor: primaryColor }}>
-                        {/* REDUCED FONT: text-lg -> text-base, kept p-3 */}
+                    {/* Final Total Row */}
+                    <tr className={`${finalRowTextColor} font-bold`} style={{ backgroundColor: finalRowColor }}>
                         <td className="p-3 text-base rounded-bl-lg">TOTAL DUE</td>
-                        {/* REDUCED FONT: text-lg -> text-base, kept p-3 */}
                         <td className="p-3 text-right text-base rounded-br-lg">{formatCurrency(totals.totalDue)}</td>
                     </tr>
                 </tbody>
@@ -436,33 +464,42 @@ const TotalsSummary = ({ totals, isEditable, onTotalChange, brandingSettings }) 
     );
 };
 
+// Utility for editable footer inputs (Used by all templates)
+const EditableFooterInput = ({ label, section, key, value, type = 'text', readOnly, isEditable, handleTemplateDetailChange, primaryColor }) => (
+    <div className='text-xs flex mb-0.5'>
+        <span className='font-semibold mr-1 shrink-0'>{label}:</span>
+        <input
+            type={type}
+            value={value}
+            onChange={(e) => isEditable && handleTemplateDetailChange(section, key, e.target.value)}
+            className={`flex-1 text-gray-700 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
+            style={isEditable ? { borderBottomColor: primaryColor } : {}}
+            readOnly={!isEditable || readOnly}
+        />
+    </div>
+);
+
 
 // -------------------------------------------------------------
-// NEW: Template Component (Existing Layout) - RENAMED to TemplateModernStyle
-// MODIFIED: Accepts brandingSettings and added editable footer
+// Template Component 1: TemplateStyleA (Structured/Modern) - RENAMED
 // -------------------------------------------------------------
-const TemplateModernStyle = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
-    // UPDATED: Destructure companyInfo
+const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
     const { primaryColor, accentColor, logoUrl, companyName, companyInfo, paymentDetails, contactDetails } = brandingSettings;
     
-    // Utility for editable footer inputs
-    const EditableFooterInput = ({ label, section, key, value, type = 'text', readOnly }) => (
-        <div className='text-xs flex mb-0.5'>
-            <span className='font-semibold mr-1 shrink-0'>{label}:</span>
-            <input
-                type={type}
-                value={value}
-                onChange={(e) => isEditable && handleTemplateDetailChange(section, key, e.target.value)}
-                className={`flex-1 text-gray-700 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
-                style={isEditable ? { borderBottomColor: primaryColor } : {}}
-                readOnly={!isEditable || readOnly}
-            />
-        </div>
+    // Utility for editable inputs inside the document
+    const EditableDocInput = ({ value, onChange, className = '', readOnly, style = {}, type = 'text' }) => (
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange}
+            className={`w-full font-bold p-0.5 text-xs text-gray-700 ${className} ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+            style={{ borderBottomColor: isEditable ? primaryColor : undefined, ...style }}
+            readOnly={!isEditable || readOnly} 
+        />
     );
 
     return (
-        // ADDED responsive padding: p-10 -> p-4 sm:p-10
-        <div id="document-template" className="relative bg-white p-4 sm:p-10 max-w-4xl mx-auto shadow-2xl border border-gray-100 rounded-lg print:p-6">
+        <div id="document-template" className="relative bg-white p-4 sm:p-10 max-w-4xl mx-auto shadow-2xl border border-gray-100 rounded-lg print:p-6 print:max-w-full print:mx-0 print:shadow-none print:border-none">
             
             {/* PAID Stamp Overlay */}
             {currentDoc.documentDetails.isPaid && currentDoc.documentType === 'Receipt' && (
@@ -473,34 +510,22 @@ const TemplateModernStyle = ({ currentDoc, isEditable, handleTemplateDetailChang
                 </div>
             )}
             
-            {/* ------------------------------------------------------------- */}
-            {/* DOCUMENT HEADER LAYOUT - MADE RESPONSIVE */}
-            {/* ------------------------------------------------------------- */}
-
-            {/* Changed flex-container to allow wrap on small screens, and stacked items on smaller screens */}
+            {/* DOCUMENT HEADER LAYOUT */}
             <div className="flex flex-col sm:flex-row justify-between items-start mb-4">
                 {/* LEFT SIDE: Logo and Company Info */}
                 <div className="flex flex-col items-start max-w-sm mb-4 sm:mb-0">
-                    {/* 1. LOGO: Always before company name */}
                     <div className="mb-3">
                         <img 
-                            // Use dynamic logoUrl
                             src={logoUrl}
                             alt="Company Logo" 
-                            className="w-auto max-w-[150px] max-h-[70px] rounded-lg" 
-                            // Fallback in case of broken Base64 or URL
+                            className="w-auto max-w-[150px] max-h-[70px] rounded-lg object-contain" 
                             onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='70'><rect width='150' height='70' fill='%23ccc'/><text x='75' y='40' font-size='12' text-anchor='middle' fill='%23666'>Logo Missing</text></svg>"; }}
                         />
                     </div>
-                    
-                    {/* 2. Company Info (AFTER logo) - NOW DYNAMIC */}
                     <div className="text-left">
-                        {/* REPLACED hardcoded text colors with inline styles */}
                         <p className="text-xl font-bold" style={{ color: primaryColor }}>
-                            {/* Dynamically display company name */}
                             {companyName.split(' ')[0]} <span style={{ color: accentColor }}>{companyName.split(' ').slice(1).join(' ')}</span>
                         </p>
-                        
                         <p className="text-xs mt-1">{companyInfo.address}</p>
                         <p className="text-xs">Phone: {companyInfo.phone}</p>
                         <p className="text-xs">Email: {companyInfo.email}</p>
@@ -510,72 +535,49 @@ const TemplateModernStyle = ({ currentDoc, isEditable, handleTemplateDetailChang
 
                 {/* RIGHT SIDE: Document Details (DOC NO, CUSTOMER ID, DATE, TERMS) */}
                 <div className="text-left sm:text-right space-y-2 text-sm w-full sm:w-70">
-                    
-                    {/* Document Type (e.g., INVOICE) */}
-                    {/* REPLACED hardcoded text color with inline style */}
                     <h2 className="text-2xl font-bold mb-4 uppercase" style={{ color: primaryColor }}>
                         {currentDoc.documentType}
                     </h2>
                     
-                    {/* DOC NO and CUSTOMER ID - MADE RESPONSIVE */}
-                    {/* Added grid-cols-1 on mobile */}
+                    {/* DOC NO and CUSTOMER ID - ACCENT COLOR STYLING */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* DOC NO Column */}
-                        <div className="text-left p-2 border border-gray-300 rounded-lg bg-gray-50 print:border-none print:bg-transparent">
+                        <div className="text-left p-2 rounded-lg print:border-none print:bg-transparent" style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}` }}>
                             <p className="text-xs font-bold text-gray-500 uppercase">DOC NO</p>
-                            <input 
-                                type="text" 
+                            <EditableDocInput 
                                 value={currentDoc.documentDetails.docNo} 
                                 onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'docNo', e.target.value)}
-                                // REPLACED hardcoded text color and focus border color with inline style
-                                className={`w-full font-bold p-0.5 text-xs mt-1 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-gray-50' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
-                                style={{ color: primaryColor, borderBottomColor: isEditable ? primaryColor : undefined }}
-                                readOnly={!isEditable}
+                                style={{ color: accentColor }}
                             />
                         </div>
-                        
-                        {/* CUSTOMER ID Column */}
-                        <div className="text-left p-2 border border-gray-300 rounded-lg bg-gray-50 print:border-none print:bg-transparent">
+                        <div className="text-left p-2 rounded-lg print:border-none print:bg-transparent" style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}` }}>
                             <p className="text-xs font-bold text-gray-500 uppercase">CUSTOMER ID</p>
-                            <input 
-                                type="text" 
+                            <EditableDocInput 
                                 value={currentDoc.clientDetails.id} 
                                 onChange={(e) => isEditable && handleTemplateDetailChange('clientDetails', 'id', e.target.value)}
-                                // REPLACED hardcoded text color and focus border color with inline style
-                                className={`w-full font-bold p-0.5 text-xs mt-1 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-gray-50' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
-                                style={{ color: primaryColor, borderBottomColor: isEditable ? primaryColor : undefined }}
+                                style={{ color: accentColor }}
                                 readOnly={true} // ID must remain READ-ONLY
                             />
                         </div>
                     </div>
 
-                    {/* DATE and TERMS - MADE RESPONSIVE */}
-                    {/* Added grid-cols-1 on mobile */}
+                    {/* DATE and TERMS - ACCENT COLOR STYLING */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* DATE Column */}
-                        <div className="text-left p-2 border border-gray-300 rounded-lg bg-gray-50 print:border-none print:bg-transparent">
+                        <div className="text-left p-2 rounded-lg print:border-none print:bg-transparent" style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}` }}>
                             <p className="text-xs font-bold text-gray-500 uppercase">DATE</p>
-                            <input 
+                            <EditableDocInput 
                                 type="date" 
                                 value={currentDoc.documentDetails.date} 
                                 onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'date', e.target.value)}
-                                // REPLACED hardcoded focus border color with inline style
-                                className={`w-full font-bold p-0.5 text-gray-700 text-xs mt-1 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-gray-50' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
-                                style={{ borderBottomColor: isEditable ? primaryColor : undefined }}
+                                className="font-bold p-0.5 text-gray-700 text-xs mt-1"
                                 readOnly={!isEditable}
                             />
                         </div>
-                        
-                        {/* TERMS Column */}
-                        <div className="text-left p-2 border border-gray-300 rounded-lg bg-gray-50 print:border-none print:bg-transparent">
+                        <div className="text-left p-2 rounded-lg print:border-none print:bg-transparent" style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}` }}>
                             <p className="text-xs font-bold text-gray-500 uppercase">TERMS</p>
-                            <input 
-                                type="text" 
+                            <EditableDocInput 
                                 value={currentDoc.documentDetails.terms} 
                                 onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'terms', e.target.value)}
-                                // REPLACED hardcoded focus border color with inline style
-                                className={`w-full font-bold p-0.5 text-gray-700 text-xs mt-1 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-gray-50' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
-                                style={{ borderBottomColor: isEditable ? primaryColor : undefined }}
+                                className="font-bold p-0.5 text-gray-700 text-xs mt-1"
                                 readOnly={!isEditable}
                             />
                         </div>
@@ -583,267 +585,263 @@ const TemplateModernStyle = ({ currentDoc, isEditable, handleTemplateDetailChang
                 </div>
             </div>
 
-            {/* REPLACED hardcoded border color with inline style */}
+            {/* Separator Line */}
             <hr className="my-4" style={{ borderColor: primaryColor, borderTopWidth: '1px' }}/>
-            
+
+            {/* Client Details (Bill To) */}
             <ClientDetailsBlock 
                 details={currentDoc.clientDetails} 
-                isEditable={isEditable}
-                onDetailChange={handleTemplateDetailChange}
+                isEditable={isEditable} 
+                onDetailChange={handleTemplateDetailChange} 
                 customers={customerList}
                 onSelectCustomer={handleSelectCustomer}
-                brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
+                brandingSettings={brandingSettings}
             />
 
+            {/* Line Items Table */}
             <LineItemsTable 
                 items={currentDoc.lineItems} 
                 isEditable={isEditable} 
-                onItemChange={handleLineItemChange}
-                onDeleteItem={handleDeleteItem}
+                onItemChange={handleLineItemChange} 
+                onDeleteItem={handleDeleteItem} 
                 onAddItem={handleAddItem}
-                brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
+                brandingSettings={brandingSettings}
+                style="modern"
             />
 
-            {/* Totals Summary - Added max-w-full and mx-auto for mobile */}
-            <div className='max-w-full mx-auto'> 
+            {/* Totals Summary */}
+            <div className='max-w-full mx-auto'>
                 <TotalsSummary 
                     totals={currentDoc.totals} 
                     isEditable={isEditable} 
                     onTotalChange={(key, value) => handleTemplateDetailChange('totals', key, value)}
-                    brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
+                    brandingSettings={brandingSettings}
                 />
             </div>
-            
+
+            {/* Footer Section */}
             <hr className="my-6 border-gray-300" />
-            
-            {/* Payment and Contact Details (NOW EDITABLE) - MADE RESPONSIVE */}
+
+            {/* Payment and Contact Details */}
             <div className="flex flex-col sm:flex-row justify-between items-start text-xs space-y-4 sm:space-y-0">
                 <div>
-                    {/* REPLACED hardcoded text color with inline style */}
                     <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Payment Details</h3>
-                    
-                    {/* Editable Account Holder - UPDATED */}
-                    <EditableFooterInput 
-                        label="Account Holder" 
-                        section="brandingSettings.paymentDetails" 
-                        key="accountHolder" 
-                        value={paymentDetails.accountHolder} 
-                        readOnly={false}
-                    />
-
-                    {/* Editable Bank Name - NEW FIELD */}
-                    <EditableFooterInput 
-                        label="Bank" 
-                        section="brandingSettings.paymentDetails" 
-                        key="bankName" 
-                        value={paymentDetails.bankName} 
-                        readOnly={false}
-                    />
-
-                    {/* Editable Account Number - UPDATED */}
-                    <EditableFooterInput 
-                        label="Account Number" 
-                        section="brandingSettings.paymentDetails" 
-                        key="accountNumber" 
-                        value={paymentDetails.accountNumber} 
-                        readOnly={false}
-                    />
-
-                    {/* Editable Payment Note */}
-                    <div className="mt-4 italic" style={{ color: brandingSettings.accentColor }}>
-                        {isEditable ? (
-                            <input
-                                type="text"
-                                value={paymentDetails.paymentNote}
-                                onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'paymentNote', e.target.value)}
-                                className={`w-full p-0.5  border-gray-300 focus:outline-none bg-transparent`}
-                                style={{ borderBottomColor: primaryColor }}
-                            />
-                        ) : (
-                            paymentDetails.paymentNote
-                        )}
-                    </div>
+                    <EditableFooterInput label="Account Holder" section="brandingSettings.paymentDetails" key="accountHolder" value={paymentDetails.accountHolder} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                    <EditableFooterInput label="Bank" section="brandingSettings.paymentDetails" key="bankName" value={paymentDetails.bankName} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                    <EditableFooterInput label="Account Number" section="brandingSettings.paymentDetails" key="accountNumber" value={paymentDetails.accountNumber} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                    <EditableFooterInput label="Note" section="brandingSettings.paymentDetails" key="paymentNote" value={paymentDetails.paymentNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
                 </div>
-
+                
                 <div className="text-left sm:text-right">
-                    <p className="font-bold mb-2">If you have any questions about this document, please contact:</p>
+                    <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Contact Details</h3>
+                    <EditableFooterInput label="Contact" section="brandingSettings.contactDetails" key="contactName" value={contactDetails.contactName} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                    <EditableFooterInput label="Phone" section="brandingSettings.contactDetails" key="contactPhone" value={contactDetails.contactPhone} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                    <EditableFooterInput label="Email" section="brandingSettings.contactDetails" key="contactEmail" value={contactDetails.contactEmail} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
                     
-                    {/* START OF EDITED SECTION: Contact Name, Phone, and Email on one line (responsive) */}
-                    <div className='text-xs flex flex-col sm:flex-row sm:justify-end sm:space-x-2 flex-wrap'>
-                        {/* 1. Contact Name */}
-                        <div className='flex items-center mb-0.5 sm:mb-0'>
-                            <span className='font-semibold mr-1 shrink-0'>Contact:</span>
-                            <input
-                                type="text"
-                                value={contactDetails.contactName}
-                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactName', e.target.value)}
-                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
-                                style={isEditable ? { borderBottomColor: primaryColor } : {}}
-                                readOnly={!isEditable}
-                            />
-                        </div>
-                        
-                        {/* 2. Contact Phone */}
-                        <div className='flex items-center mb-0.5 sm:mb-0'>
-                            <span className='font-semibold mr-1 shrink-0'>Tel:</span>
-                            <input
-                                type="text"
-                                value={contactDetails.contactPhone}
-                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactPhone', e.target.value)}
-                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
-                                style={isEditable ? { borderBottomColor: primaryColor } : {}}
-                                readOnly={!isEditable}
-                            />
-                        </div>
-                        
-                        {/* 3. Contact Email */}
-                        <div className='flex items-center mb-0.5 sm:mb-0'>
-                            <span className='font-semibold mr-1 shrink-0'>Email:</span>
-                            <input
-                                type="text"
-                                value={contactDetails.contactEmail}
-                                onChange={(e) => isEditable && handleTemplateDetailChange('brandingSettings.contactDetails', 'contactEmail', e.target.value)}
-                                // REPLACED hardcoded text color with inline style
-                                className={`flex-1 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none' : 'border-none bg-transparent'} print:border-none print:shadow-none print:bg-transparent`}
-                                style={{ color: primaryColor, borderBottomColor: isEditable ? primaryColor : undefined }}
-                                readOnly={!isEditable}
-                            />
-                        </div>
-                    </div>
-                    {/* END OF EDITED SECTION */}
-
-                    {/* Editable Thank You Note */}
-                    <div className="mt-4 text-sm font-bold" style={{ color: primaryColor }}>
-                        {isEditable ? (
-                            <input
-                                type="text"
-                                value={contactDetails.thankYouNote}
-                                onChange={(e) => handleTemplateDetailChange('brandingSettings.contactDetails', 'thankYouNote', e.target.value)}
-                                className={`w-full text-left sm:text-right p-0.5 border-b border-gray-300 focus:outline-none bg-transparent`}
-                                style={{ borderBottomColor: primaryColor, color: primaryColor }}
-                            />
-                        ) : (
-                            contactDetails.thankYouNote
-                        )}
+                    <div className='mt-4'>
+                        <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Thank You Note</h3>
+                        <EditableFooterInput label="Note" section="brandingSettings.contactDetails" key="thankYouNote" value={contactDetails.thankYouNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
                     </div>
                 </div>
             </div>
+
+            <div className='h-4 print:h-0'></div>
         </div>
     );
 };
 
 
 // -------------------------------------------------------------
-// NEW: Template Component Style B (Simple Variant) - RENAMED to TemplateSimpleStyle
-// MODIFIED: Accepts brandingSettings and added editable footer
+// Template Component 2: TemplateStyleB (Minimal) - RENAMED
 // -------------------------------------------------------------
-const TemplateSimpleStyle = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
-    // UPDATED: Destructure companyInfo
+const TemplateStyleB = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
     const { primaryColor, logoUrl, companyName, companyInfo, templateBThankYou } = brandingSettings;
+    
+    // Utility for editable inputs inside the document
+    const EditableDocInput = ({ value, onChange, className = '', readOnly, style = {}, type = 'text' }) => (
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange}
+            className={`w-full font-normal p-0.5 text-xs text-gray-700 ${className} ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+            style={{ borderBottomColor: isEditable ? primaryColor : undefined, ...style }}
+            readOnly={!isEditable || readOnly} 
+        />
+    );
+
     return (
         <div 
             id="document-template" 
-            // ADDED responsive padding: p-10 -> p-4 sm:p-10
-            className="relative bg-white p-4 sm:p-10 max-w-4xl mx-auto shadow-2xl rounded-none print:p-6"
-            // REPLACED hardcoded border color with inline style
-            style={{ borderColor: primaryColor, borderWidth: '2px', borderStyle: 'solid' }}
+            // MODIFIED: Removed full border, added heavy bottom border for minimal look
+            className="relative bg-white p-4 sm:p-10 max-w-4xl mx-auto shadow-lg rounded-lg print:p-6 print:max-w-full print:mx-0 print:shadow-none"
+            style={{ borderBottomColor: primaryColor, borderBottomWidth: '4px', borderStyle: 'solid' }}
         >
-            
+
             {/* PAID Stamp Overlay */}
             {currentDoc.documentDetails.isPaid && currentDoc.documentType === 'Receipt' && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                    <span className="text-8xl font-black text-red-700 opacity-20 transform -rotate-12 select-none border-4 border-red-700 p-8 rounded-xl shadow-2xl">
+                    <span className="text-9xl font-black text-green-500 opacity-20 transform -rotate-12 select-none border-4 border-green-500 p-10 rounded-xl shadow-2xl">
                         {currentDoc.documentDetails.stampText}
                     </span>
                 </div>
             )}
-
-            {/* Header - Simple Style - MADE RESPONSIVE */}
-            {/* flex-col on mobile, flex-row on md screens */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b-4 border-gray-300 pb-4">
-                <div className="mb-4 md:mb-0">
-                    {/* REPLACED hardcoded text color with inline style */}
-                    <h1 className="text-4xl font-extrabold uppercase" style={{ color: primaryColor }}>{currentDoc.documentType}</h1>
-                    <p className="text-sm text-gray-600 mt-2">Document No: <span className='font-semibold'>{currentDoc.documentDetails.docNo}</span></p>
-                    <p className="text-sm text-gray-600">Date: <span className='font-semibold'>{currentDoc.documentDetails.date}</span></p>
-                </div>
-                
-                {/* Right side: Logo & Company Info */}
-                <div className='flex flex-col items-start md:items-end text-left md:text-right'>
-                    <img 
-                        src={logoUrl}
-                        alt="Company Logo" 
-                        className="w-auto max-w-[120px] max-h-[50px] mb-2 rounded-lg" 
-                        onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='50'><rect width='120' height='50' fill='%23ccc'/><text x='60' y='30' font-size='10' text-anchor='middle' fill='%23666'>Logo</text></svg>"; }}
-                    />
-                    <p className="text-sm font-bold text-gray-800">{companyName}</p>
-                    <p className="text-xs text-gray-600">{companyInfo.address}</p>
-                </div>
-            </div>
             
-            {/* Client Details (Simplified for Template B) - MADE RESPONSIVE */}
-            <div className="flex flex-col md:flex-row justify-between items-start mb-8 space-y-4 md:space-y-0">
-                {/* BILL TO */}
-                {/* REPLACED hardcoded border color with inline style */}
-                <div className="w-full md:w-1/2 md:pr-8 md:border-r border-gray-200" style={{ borderRightColor: primaryColor }}>
-                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-700">Bill To</h3>
-                    <p className="text-sm font-semibold">{currentDoc.clientDetails.name} ({currentDoc.clientDetails.company})</p>
-                    <p className="text-xs text-gray-600">{currentDoc.clientDetails.address}</p>
-                    <p className="text-xs text-gray-600">{currentDoc.clientDetails.cityStateZip}</p>
-                    <p className="text-xs text-gray-600">{currentDoc.clientDetails.email}</p>
+            {/* Header: Logo, Company Info, Doc Type - MODIFIED LAYOUT */}
+            <div className="flex justify-between items-start mb-8">
+                {/* LEFT SIDE: Document Type and Company Info (now simplified and smaller) */}
+                <div className="flex flex-col items-start max-w-sm">
+                    {/* Document Type (e.g., INVOICE) - Larger and bold */}
+                    <h2 className="text-4xl font-extrabold mb-4 uppercase" style={{ color: primaryColor }}>
+                        {currentDoc.documentType}
+                    </h2>
+
+                    {/* Company Info */}
+                    <div className="text-left mt-2">
+                        <p className="text-sm font-bold text-gray-700 mb-1">{companyName}</p>
+                        <p className="text-xs">{companyInfo.address}</p>
+                        <p className="text-xs">Email: {companyInfo.email}</p>
+                        <p className="text-xs">VAT No: {companyInfo.vatNo}</p>
+                    </div>
                 </div>
-                
-                {/* OTHER DOC DETAILS */}
-                <div className="w-full md:w-1/2 md:pl-8">
-                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-700">Details</h3>
-                    <div className="space-y-1">
-                        <p className="text-xs">
-                            <span className="font-semibold">VAT No:</span> {companyInfo.vatNo}
+
+                {/* RIGHT SIDE: Logo and Doc Details - Simplified box */}
+                <div className="flex flex-col items-end text-right space-y-4">
+                    {/* Logo */}
+                    <div className="mb-3">
+                        <img 
+                            src={logoUrl}
+                            alt="Company Logo" 
+                            // Reduced logo size for minimal template
+                            className="w-auto max-w-[120px] max-h-[60px] object-contain rounded-lg" 
+                            onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='60'><rect width='120' height='60' fill='%23ccc'/><text x='60' y='35' font-size='10' text-anchor='middle' fill='%23666'>Logo</text></svg>"; }}
+                        />
+                    </div>
+                    
+                    {/* Doc Details Box - Simple black text, primary color border on sides */}
+                    <div className='p-4 border-l-4 border-r-4 text-xs space-y-1' style={{ borderColor: primaryColor }}>
+                        <p><span className="font-bold">{currentDoc.documentType} No:</span> 
+                            <EditableDocInput 
+                                value={currentDoc.documentDetails.docNo} 
+                                onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'docNo', e.target.value)} 
+                                className="inline w-auto ml-1 font-bold"
+                            />
                         </p>
-                        <p className="text-xs">
-                            <span className="font-semibold">Terms:</span> {currentDoc.documentDetails.terms}
+                        <p><span className="font-bold">Date:</span>
+                            <input 
+                                type="date" 
+                                value={currentDoc.documentDetails.date} 
+                                onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'date', e.target.value)}
+                                className={`w-auto ml-1 font-normal text-xs text-gray-700 p-0.5 ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+                                style={{ borderBottomColor: isEditable ? primaryColor : undefined }}
+                                readOnly={!isEditable}
+                            />
                         </p>
-                        {/* New Payment Details Display (Simplified) */}
-                        <p className="text-xs pt-2">
-                            <span className="font-semibold" style={{ color: primaryColor }}>
-                                Payment:
-                            </span> {brandingSettings.paymentDetails.accountHolder} - {brandingSettings.paymentDetails.bankName} Acc: {brandingSettings.paymentDetails.accountNumber}
-                        </p>
-                        
+                        <p className="font-bold">Customer ID: {currentDoc.clientDetails.id}</p>
                     </div>
                 </div>
             </div>
 
-            <LineItemsTable 
-                items={currentDoc.lineItems} 
-                isEditable={isEditable} 
-                onItemChange={handleLineItemChange}
-                onDeleteItem={handleDeleteItem}
-                onAddItem={handleAddItem}
-                brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
-            />
+            {/* Client and Other Details Section - REMOVED gray background */}
+            <hr className="my-6 border-gray-300" />
+            <div className='flex flex-col md:flex-row justify-between mb-8 p-0'>
+                {/* CUSTOMER DETAILS */}
+                <div className="w-full md:w-1/2 md:pr-8 mb-4 md:mb-0">
+                    <ClientDetailsBlock 
+                        details={currentDoc.clientDetails} 
+                        isEditable={isEditable} 
+                        onDetailChange={handleTemplateDetailChange} 
+                        customers={customerList}
+                        onSelectCustomer={handleSelectCustomer}
+                        brandingSettings={brandingSettings}
+                        style="minimal" // Use minimal style for no border/background
+                    />
+                </div>
 
-            {/* Totals Summary - Added max-w-full and mx-auto for mobile */}
-            <div className='max-w-full mx-auto'> 
-                <TotalsSummary 
-                    totals={currentDoc.totals} 
+                {/* OTHER DOC DETAILS - SIMPLIFIED BLOCK */}
+                <div className="w-full md:w-1/2 md:pl-8 mt-4 md:mt-0">
+                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-700">Additional Details</h3>
+                    <div className="space-y-1">
+                        <p className="text-xs">
+                            <span className="font-semibold">Terms:</span>
+                            <EditableDocInput 
+                                value={currentDoc.documentDetails.terms} 
+                                onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'terms', e.target.value)} 
+                                className="inline w-3/4 ml-1"
+                            />
+                        </p>
+                        <p className="text-xs">
+                            <span className="font-semibold">Prepared By:</span>
+                            <EditableDocInput 
+                                value={brandingSettings.contactDetails.contactName} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.contactDetails', 'contactName', e.target.value)} 
+                                className="inline w-3/4 ml-1" 
+                            />
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Line Items Table (Modified for simple style) */}
+            <div className="mb-8">
+                <LineItemsTable 
+                    items={currentDoc.lineItems} 
                     isEditable={isEditable} 
-                    onTotalChange={(key, value) => handleTemplateDetailChange('totals', key, value)}
-                    brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
+                    onItemChange={handleLineItemChange} 
+                    onDeleteItem={handleDeleteItem} 
+                    onAddItem={handleAddItem}
+                    brandingSettings={brandingSettings}
+                    style="simple" // Use simple style for light header
                 />
             </div>
             
-            <hr className="my-6 border-gray-200" />
-            
-            {/* Footer - Simple Thank You Note */}
+
+            {/* Totals Summary (Simplified block style) - MANUAL TABLE (BYPASSING TotalsSummary) */}
+            <div className="flex justify-end">
+                <table className="w-full sm:w-80">
+                    <tbody>
+                        {/* Subtotal */}
+                        <tr className="">
+                            <td className="py-1 px-2 text-xs font-medium text-right">SUBTOTAL</td>
+                            <td className="py-1 px-2 text-right text-xs border-b border-gray-200">{formatCurrency(currentDoc.totals.subtotal)}</td>
+                        </tr>
+                        {/* Tax Rate */}
+                        <tr>
+                            <td className="py-1 px-2 text-xs font-medium text-right">TAX RATE (%)</td>
+                            <td className="py-1 px-2 text-right text-xs border-b border-gray-200">
+                                {/* Inline editable tax rate */}
+                                <EditableDocInput 
+                                    type="number" 
+                                    value={currentDoc.totals.taxRate} 
+                                    onChange={(e) => isEditable && handleTemplateDetailChange('totals', 'taxRate', e.target.value)} 
+                                    className="w-12 inline text-right"
+                                    readOnly={!isEditable}
+                                />%
+                            </td>
+                        </tr>
+                        {/* Tax */}
+                        <tr>
+                            <td className="py-1 px-2 text-xs font-medium text-right">TAX</td>
+                            <td className="py-1 px-2 text-right text-xs border-b border-gray-200">{formatCurrency(currentDoc.totals.tax)}</td>
+                        </tr>
+                        {/* TOTAL DUE - Simple border and primary color text (No full block) */}
+                        <tr className="font-bold border-t-2" style={{ borderColor: primaryColor }}>
+                            <td className="p-3 text-base text-right" style={{ color: primaryColor }}>TOTAL DUE</td>
+                            <td className="p-3 text-base text-right" style={{ color: primaryColor }}>{formatCurrency(currentDoc.totals.totalDue)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Footer / Thank You Note - Added Divider */}
+            <hr className="my-8 border-gray-300" />
             <div className="text-center">
-                {/* Editable Thank You Note */}
-                <div className="mt-4 text-sm font-bold" style={{ color: primaryColor }}>
+                <div className="text-sm font-bold" style={{ color: primaryColor }}>
                     {isEditable ? (
-                        <input
-                            type="text"
-                            value={templateBThankYou}
-                            onChange={(e) => handleTemplateDetailChange('brandingSettings', 'templateBThankYou', e.target.value)}
+                        <input 
+                            type="text" 
+                            value={templateBThankYou} 
+                            // This change updates the top-level templateBThankYou in brandingSettings
+                            onChange={(e) => handleTemplateDetailChange('brandingSettings', 'templateBThankYou', e.target.value)} 
                             className={`w-full text-center p-0.5 border-b border-gray-300 focus:outline-none bg-transparent`}
                             style={{ borderBottomColor: primaryColor, color: primaryColor }}
                         />
@@ -851,31 +849,715 @@ const TemplateSimpleStyle = ({ currentDoc, isEditable, handleTemplateDetailChang
                         templateBThankYou
                     )}
                 </div>
+                <p className="text-xs text-gray-500 mt-2">
+                    Please ensure payment is made to the following account details.
+                </p>
+                <p className="text-xs text-gray-500">
+                    <span className='font-bold'>Account:</span> {brandingSettings.paymentDetails.accountHolder} ({brandingSettings.paymentDetails.bankName}) | 
+                    <span className='font-bold'> Acc No:</span> {brandingSettings.paymentDetails.accountNumber}
+                </p>
             </div>
-
+            
+            <div className='h-4 print:h-0'></div>
         </div>
     );
 };
 
 
 // -------------------------------------------------------------
-// TEMPLATE SWITCHER - UPDATED WITH NEW NAMES
+// Template Component 3: TemplateStyleC (Monotone) - NEW
 // -------------------------------------------------------------
-const DocumentTemplate = (props) => {
-    switch (props.currentDoc.templateStyle) {
-        case 'SimpleStyle': // Renamed from StyleB
-            return <TemplateSimpleStyle {...props} />; // Renamed component
-        case 'ModernStyle': // Renamed from StyleA
-        default:
-            return <TemplateModernStyle {...props} />; // Renamed component
-    }
+const TemplateStyleC = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
+    const { primaryColor, logoUrl, companyName, companyInfo, paymentDetails, contactDetails } = brandingSettings;
+    
+    // Utility for editable inputs inside the document
+    const EditableDocInput = ({ value, onChange, className = '', readOnly, style = {}, type = 'text' }) => (
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange}
+            className={`w-full font-normal p-0.5 text-xs text-gray-900 ${className} ${isEditable ? 'border-b border-gray-400 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+            style={{ borderBottomColor: isEditable ? primaryColor : undefined, ...style }}
+            readOnly={!isEditable || readOnly} 
+        />
+    );
+
+    return (
+        <div id="document-template" className="relative bg-white p-4 sm:p-10 max-w-4xl mx-auto shadow-2xl border border-gray-900 rounded-lg print:p-6 print:max-w-full print:mx-0 print:shadow-none print:border-none">
+            
+            {/* PAID Stamp Overlay */}
+            {currentDoc.documentDetails.isPaid && currentDoc.documentType === 'Receipt' && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-8xl font-black text-gray-900 opacity-10 transform -rotate-12 select-none border-4 border-gray-900 p-8 rounded-xl shadow-2xl">
+                        {currentDoc.documentDetails.stampText}
+                    </span>
+                </div>
+            )}
+            
+            {/* DOCUMENT HEADER LAYOUT - Monotone */}
+            <div className="flex flex-col sm:flex-row justify-between items-start mb-8">
+                {/* LEFT SIDE: Document Type */}
+                <div className="flex flex-col items-start max-w-sm mb-4 sm:mb-0">
+                    <h2 className="text-4xl font-extrabold mb-4 uppercase text-gray-900">
+                        {currentDoc.documentType}
+                    </h2>
+                </div>
+
+                {/* RIGHT SIDE: Logo and Company Info */}
+                <div className="text-left sm:text-right space-y-2 text-sm w-full sm:w-70">
+                    <div className="flex flex-col items-end">
+                        <img 
+                            src={logoUrl}
+                            alt="Company Logo" 
+                            className="w-auto max-w-[150px] max-h-[70px] rounded-lg object-contain" 
+                            onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='70'><rect width='150' height='70' fill='%23ccc'/><text x='75' y='40' font-size='12' text-anchor='middle' fill='%23666'>Logo Missing</text></svg>"; }}
+                        />
+                        <p className="text-xl font-bold text-gray-900 mt-2">{companyName}</p>
+                        <p className="text-xs">{companyInfo.address}</p>
+                        <p className="text-xs">Phone: {companyInfo.phone}</p>
+                        <p className="text-xs">Email: {companyInfo.email}</p>
+                        <p className="text-xs">Vat No. {companyInfo.vatNo}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Document Details Block (Black border, white background) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border border-gray-900 bg-white rounded-lg mb-8">
+                <div className='col-span-1'>
+                    <p className="text-xs font-bold text-gray-700 uppercase">DOC NO</p>
+                    <EditableDocInput 
+                        value={currentDoc.documentDetails.docNo} 
+                        onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'docNo', e.target.value)}
+                        className="font-bold text-sm mt-1"
+                    />
+                </div>
+                <div className='col-span-1'>
+                    <p className="text-xs font-bold text-gray-700 uppercase">CUSTOMER ID</p>
+                    <EditableDocInput 
+                        value={currentDoc.clientDetails.id} 
+                        className="font-bold text-sm mt-1"
+                        readOnly={true}
+                    />
+                </div>
+                <div className='col-span-1'>
+                    <p className="text-xs font-bold text-gray-700 uppercase">DATE</p>
+                    <EditableDocInput 
+                        type="date" 
+                        value={currentDoc.documentDetails.date} 
+                        onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'date', e.target.value)}
+                        className="font-bold text-sm mt-1"
+                    />
+                </div>
+                <div className='col-span-1'>
+                    <p className="text-xs font-bold text-gray-700 uppercase">TERMS</p>
+                    <EditableDocInput 
+                        value={currentDoc.documentDetails.terms} 
+                        onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'terms', e.target.value)}
+                        className="font-bold text-sm mt-1"
+                    />
+                </div>
+            </div>
+
+            {/* Client Details (Bill To) - Monotone style (dark border, no color) */}
+            <ClientDetailsBlock 
+                details={currentDoc.clientDetails} 
+                isEditable={isEditable} 
+                onDetailChange={handleTemplateDetailChange} 
+                customers={customerList}
+                onSelectCustomer={handleSelectCustomer}
+                brandingSettings={brandingSettings}
+                style="monotone"
+            />
+
+            {/* Line Items Table */}
+            <LineItemsTable 
+                items={currentDoc.lineItems} 
+                isEditable={isEditable} 
+                onItemChange={handleLineItemChange} 
+                onDeleteItem={handleDeleteItem} 
+                onAddItem={handleAddItem}
+                brandingSettings={brandingSettings}
+                style="monotone" // Use monotone style for table header
+            />
+
+            {/* Totals Summary */}
+            <div className='max-w-full mx-auto'>
+                <TotalsSummary 
+                    totals={currentDoc.totals} 
+                    isEditable={isEditable} 
+                    onTotalChange={(key, value) => handleTemplateDetailChange('totals', key, value)}
+                    brandingSettings={brandingSettings}
+                    style="monotone" // Use monotone style for total box
+                />
+            </div>
+
+            {/* Footer Section */}
+            <hr className="my-6 border-gray-900" />
+
+            {/* Payment and Contact Details */}
+            <div className="flex flex-col sm:flex-row justify-between items-start text-xs space-y-4 sm:space-y-0">
+                <div>
+                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-900">Payment Details</h3>
+                    <EditableFooterInput label="Account Holder" section="brandingSettings.paymentDetails" key="accountHolder" value={paymentDetails.accountHolder} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    <EditableFooterInput label="Bank" section="brandingSettings.paymentDetails" key="bankName" value={paymentDetails.bankName} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    <EditableFooterInput label="Account Number" section="brandingSettings.paymentDetails" key="accountNumber" value={paymentDetails.accountNumber} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    <EditableFooterInput label="Note" section="brandingSettings.paymentDetails" key="paymentNote" value={paymentDetails.paymentNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                </div>
+                
+                <div className="text-left sm:text-right">
+                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-900">Contact Details</h3>
+                    <EditableFooterInput label="Contact" section="brandingSettings.contactDetails" key="contactName" value={contactDetails.contactName} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    <EditableFooterInput label="Phone" section="brandingSettings.contactDetails" key="contactPhone" value={contactDetails.contactPhone} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    <EditableFooterInput label="Email" section="brandingSettings.contactDetails" key="contactEmail" value={contactDetails.contactEmail} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    
+                    <div className='mt-4'>
+                        <h3 className="text-sm font-bold mb-2 uppercase text-gray-900">Thank You Note</h3>
+                        <EditableFooterInput label="Note" section="brandingSettings.contactDetails" key="thankYouNote" value={contactDetails.thankYouNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
+                    </div>
+                </div>
+            </div>
+
+            <div className='h-4 print:h-0'></div>
+        </div>
+    );
 };
 
+
 // -------------------------------------------------------------
-// MAIN APP COMPONENT
+// Template Component 4: TemplateStyleD (Vibrant Left Bar) - NEW
+// -------------------------------------------------------------
+const TemplateStyleD = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
+    const { primaryColor, accentColor, logoUrl, companyName, companyInfo, paymentDetails, contactDetails } = brandingSettings;
+    
+    // Utility for editable inputs inside the document
+    const EditableDocInput = ({ value, onChange, className = '', readOnly, style = {}, type = 'text' }) => (
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange}
+            className={`w-full font-bold p-0.5 text-xs text-gray-700 ${className} ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+            style={{ borderBottomColor: isEditable ? primaryColor : undefined, ...style }}
+            readOnly={!isEditable || readOnly} 
+        />
+    );
+
+    return (
+        <div id="document-template" className="relative bg-white max-w-4xl mx-auto shadow-2xl rounded-lg overflow-hidden print:max-w-full print:mx-0 print:shadow-none print:border-none">
+            
+            {/* PAID Stamp Overlay */}
+            {currentDoc.documentDetails.isPaid && currentDoc.documentType === 'Receipt' && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-8xl font-black text-green-500 opacity-20 transform -rotate-12 select-none border-4 border-green-500 p-8 rounded-xl shadow-2xl">
+                        {currentDoc.documentDetails.stampText}
+                    </span>
+                </div>
+            )}
+            
+            <div className="flex">
+                {/* LEFT BAR: Company Info - Full Height Primary Color */}
+                <div className="w-48 p-4 text-white flex flex-col justify-start space-y-4" style={{ backgroundColor: primaryColor, minHeight: '800px' }}>
+                    
+                    <h2 className="text-xl font-extrabold uppercase mb-2">{companyName}</h2>
+                    
+                    <div className="text-sm space-y-1">
+                        <p className="font-semibold">{companyInfo.address}</p>
+                        <p>Phone: {companyInfo.phone}</p>
+                        <p>Email: {companyInfo.email}</p>
+                        <p>VAT No: {companyInfo.vatNo}</p>
+                    </div>
+
+                    <div className="mt-8 pt-4 border-t border-white/50 text-sm space-y-1">
+                        <p className="font-semibold uppercase">Details:</p>
+                        <p>Doc No: {currentDoc.documentDetails.docNo}</p>
+                        <p>Date: {currentDoc.documentDetails.date}</p>
+                        <p>Terms: {currentDoc.documentDetails.terms}</p>
+                    </div>
+
+                    <img 
+                        src={logoUrl}
+                        alt="Company Logo" 
+                        className="w-auto max-w-[120px] max-h-[60px] object-contain rounded-lg mt-auto mb-4" 
+                        onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='60'><rect width='120' height='60' fill='%23aaa'/><text x='60' y='35' font-size='10' text-anchor='middle' fill='%23666'>Logo</text></svg>"; }}
+                    />
+                </div>
+
+                {/* RIGHT CONTENT: Document, Client, Items, Totals */}
+                <div className="flex-1 p-4 sm:p-10">
+                    
+                    {/* Header Top */}
+                    <div className="flex justify-between items-start mb-8 border-b-2 pb-4" style={{ borderBottomColor: accentColor }}>
+                        <h1 className="text-4xl font-extrabold uppercase" style={{ color: primaryColor }}>
+                            {currentDoc.documentType}
+                        </h1>
+                        <div className="text-right text-sm">
+                            <p className="font-bold">Customer ID: {currentDoc.clientDetails.id}</p>
+                            <p className="font-bold">Total Due: <span className='text-xl' style={{ color: primaryColor }}>{formatCurrency(currentDoc.totals.totalDue)}</span></p>
+                        </div>
+                    </div>
+
+                    {/* Client Details (Bill To) */}
+                    <ClientDetailsBlock 
+                        details={currentDoc.clientDetails} 
+                        isEditable={isEditable} 
+                        onDetailChange={handleTemplateDetailChange} 
+                        customers={customerList}
+                        onSelectCustomer={handleSelectCustomer}
+                        brandingSettings={brandingSettings}
+                    />
+
+                    {/* Line Items Table */}
+                    <LineItemsTable 
+                        items={currentDoc.lineItems} 
+                        isEditable={isEditable} 
+                        onItemChange={handleLineItemChange} 
+                        onDeleteItem={handleDeleteItem} 
+                        onAddItem={handleAddItem}
+                        brandingSettings={brandingSettings}
+                        style="modern" // Uses primary color header
+                    />
+
+                    {/* Totals Summary */}
+                    <div className='max-w-full mx-auto'>
+                        <TotalsSummary 
+                            totals={currentDoc.totals} 
+                            isEditable={isEditable} 
+                            onTotalChange={(key, value) => handleTemplateDetailChange('totals', key, value)}
+                            brandingSettings={brandingSettings}
+                        />
+                    </div>
+
+                    {/* Footer Section - Payment/Contact Details (Simplified) */}
+                    <hr className="my-6 border-gray-300" />
+                    <div className="flex justify-between items-start text-xs space-y-4 sm:space-y-0">
+                        <div>
+                            <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Payment Instructions</h3>
+                            <p>Bank: {paymentDetails.bankName}</p>
+                            <p>Account: {paymentDetails.accountNumber}</p>
+                            <p className='font-semibold mt-1'>{paymentDetails.paymentNote}</p>
+                        </div>
+                        <div className="text-right">
+                            <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Contact</h3>
+                            <p>{contactDetails.contactName}</p>
+                            <p>{contactDetails.contactPhone}</p>
+                            <p>{contactDetails.contactEmail}</p>
+                        </div>
+                    </div>
+
+                    <div className='h-4 print:h-0'></div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// -------------------------------------------------------------
+// Template Component 5: TemplateStyleE (Solid Header Block) - NEW
+// -------------------------------------------------------------
+const TemplateStyleE = ({ currentDoc, isEditable, handleTemplateDetailChange, customerList, handleSelectCustomer, handleLineItemChange, handleDeleteItem, handleAddItem, brandingSettings }) => {
+    const { primaryColor, logoUrl, companyName, companyInfo, paymentDetails, contactDetails } = brandingSettings;
+    
+    // Utility for editable inputs inside the document
+    const EditableDocInput = ({ value, onChange, className = '', readOnly, style = {}, type = 'text' }) => (
+        <input 
+            type={type} 
+            value={value} 
+            onChange={onChange}
+            className={`w-full font-normal p-0.5 text-xs text-gray-700 ${className} ${isEditable ? 'border-b border-gray-300 focus:outline-none bg-transparent' : 'border-none bg-transparent'} print:border-none print:bg-transparent print:shadow-none`}
+            style={{ borderBottomColor: isEditable ? primaryColor : undefined, ...style }}
+            readOnly={!isEditable || readOnly} 
+        />
+    );
+
+    return (
+        <div id="document-template" className="relative bg-white max-w-4xl mx-auto shadow-2xl border border-gray-200 rounded-lg overflow-hidden print:max-w-full print:mx-0 print:shadow-none print:border-none">
+            
+            {/* PAID Stamp Overlay */}
+            {currentDoc.documentDetails.isPaid && currentDoc.documentType === 'Receipt' && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <span className="text-8xl font-black text-green-500 opacity-20 transform -rotate-12 select-none border-4 border-green-500 p-8 rounded-xl shadow-2xl">
+                        {currentDoc.documentDetails.stampText}
+                    </span>
+                </div>
+            )}
+            
+            {/* TOP HEADER BLOCK - Primary Color */}
+            <div className="p-6 sm:p-8 text-white flex justify-between items-center" style={{ backgroundColor: primaryColor }}>
+                
+                {/* LEFT: Company Logo/Name/Doc Type */}
+                <div className="flex items-center space-x-6">
+                    <img 
+                        src={logoUrl}
+                        alt="Company Logo" 
+                        className="w-auto max-w-[100px] max-h-[50px] object-contain rounded-lg" 
+                        onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='50'><rect width='100' height='50' fill='%23aaa'/><text x='50' y='30' font-size='10' text-anchor='middle' fill='%23fff'>Logo</text></svg>"; }}
+                    />
+                    <div>
+                        <h1 className="text-3xl font-extrabold uppercase">{currentDoc.documentType}</h1>
+                        <p className='text-sm font-semibold'>{companyName}</p>
+                    </div>
+                </div>
+
+                {/* RIGHT: Document No */}
+                <div className="text-right">
+                    <p className='text-sm font-bold uppercase'>Doc No:</p>
+                    <EditableDocInput 
+                        value={currentDoc.documentDetails.docNo} 
+                        onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'docNo', e.target.value)} 
+                        className="inline w-auto ml-1 font-bold text-lg text-white"
+                        style={{ borderBottomColor: 'white' }}
+                    />
+                </div>
+            </div>
+
+            {/* MAIN CONTENT AREA */}
+            <div className="p-4 sm:p-8">
+                
+                {/* Company & Client Info Section */}
+                <div className="flex flex-col sm:flex-row justify-between mb-8 space-y-6 sm:space-y-0">
+                    
+                    {/* LEFT: Company Contact Info (Below Header) */}
+                    <div className="text-xs space-y-1 p-3 border border-gray-300 rounded-lg">
+                        <h3 className="font-bold text-gray-700 uppercase mb-1">Our Details</h3>
+                        <p>{companyInfo.address}</p>
+                        <p>Tel: {companyInfo.phone} | Email: {companyInfo.email}</p>
+                        <p>VAT No: {companyInfo.vatNo}</p>
+                    </div>
+
+                    {/* RIGHT: Client Details (Bill To) */}
+                    <div className='sm:w-1/2'>
+                        <ClientDetailsBlock 
+                            details={currentDoc.clientDetails} 
+                            isEditable={isEditable} 
+                            onDetailChange={handleTemplateDetailChange} 
+                            customers={customerList}
+                            onSelectCustomer={handleSelectCustomer}
+                            brandingSettings={brandingSettings}
+                            style="minimal"
+                        />
+                    </div>
+                </div>
+
+                {/* Document Details Block (Dates/Terms) */}
+                <div className="flex justify-end mb-8">
+                    <div className='flex space-x-4 text-xs font-semibold p-3 border border-gray-300 rounded-lg'>
+                        <p>Date: 
+                            <EditableDocInput 
+                                type="date" 
+                                value={currentDoc.documentDetails.date} 
+                                onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'date', e.target.value)}
+                                className="inline w-auto ml-1"
+                            />
+                        </p>
+                        <p>Terms: 
+                            <EditableDocInput 
+                                value={currentDoc.documentDetails.terms} 
+                                onChange={(e) => isEditable && handleTemplateDetailChange('documentDetails', 'terms', e.target.value)}
+                                className="inline w-auto ml-1"
+                            />
+                        </p>
+                    </div>
+                </div>
+
+                {/* Line Items Table */}
+                <LineItemsTable 
+                    items={currentDoc.lineItems} 
+                    isEditable={isEditable} 
+                    onItemChange={handleLineItemChange} 
+                    onDeleteItem={handleDeleteItem} 
+                    onAddItem={handleAddItem}
+                    brandingSettings={brandingSettings}
+                    style="modern" // Uses primary color header
+                />
+
+                {/* Totals Summary */}
+                <div className='max-w-full mx-auto mt-8'>
+                    <TotalsSummary 
+                        totals={currentDoc.totals} 
+                        isEditable={isEditable} 
+                        onTotalChange={(key, value) => handleTemplateDetailChange('totals', key, value)}
+                        brandingSettings={brandingSettings}
+                    />
+                </div>
+
+                {/* Footer Section */}
+                <hr className="my-6 border-gray-300" />
+                <div className="text-xs">
+                    <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Payment Details</h3>
+                    <p className='font-semibold'>{paymentDetails.accountHolder} ({paymentDetails.bankName}) - Acc No: {paymentDetails.accountNumber}</p>
+                    <p className='mt-1'>{paymentDetails.paymentNote}</p>
+                    
+                    <div className='mt-4'>
+                        <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Contact / Note</h3>
+                        <p>{contactDetails.contactName} - {contactDetails.contactPhone} / {contactDetails.contactEmail}</p>
+                        <p className='font-semibold mt-1'>{contactDetails.thankYouNote}</p>
+                    </div>
+                </div>
+
+                <div className='h-4 print:h-0'></div>
+            </div>
+        </div>
+    );
+};
+
+
+// -------------------------------------------------------------
+// NEW: Branding Settings Modal Component
+// (Kept outside App for brevity, but functionality is integrated)
+// -------------------------------------------------------------
+const BrandingSettingsModal = ({ isOpen, onClose, brandingSettings, handleBrandingChange, handleTemplateDetailChange, handleLogoFileUpload, logoInputRef }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-start justify-center p-4 sm:p-8 z-50 overflow-y-auto">
+            <div className="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl mt-8 mb-8">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6 border-b pb-4">
+                    <h2 className="text-2xl font-bold" style={{ color: brandingSettings.primaryColor }}>
+                        <Settings size={24} className="inline mr-2" /> Branding Settings
+                    </h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                        <X size={24} />
+                    </button>
+                </div>
+                
+                {/* Settings Grid */}
+                <div className="space-y-6">
+
+                    {/* 1. General Company Info */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Company Name */}
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Company Name:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.companyName} 
+                                onChange={(e) => handleBrandingChange('companyName', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                        </div>
+                        {/* Company VAT No */}
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">VAT Number:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.companyInfo.vatNo} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'vatNo', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* 2. Logo Upload */}
+                    <div className="mb-4 border-t pt-4">
+                        <h5 className="text-xs font-bold text-gray-700 mb-2">Company Logo</h5>
+                        <div className='flex items-end justify-between'>
+                            <button 
+                                onClick={() => logoInputRef.current.click()} 
+                                className='flex items-center text-white py-2 px-3 rounded-lg text-sm hover:opacity-80 transition'
+                                style={{ backgroundColor: brandingSettings.primaryColor }}
+                            >
+                                Upload File
+                            </button>
+                            <img src={brandingSettings.logoUrl} alt="Current Logo" className='w-12 h-12 object-contain border rounded' />
+                        </div>
+                        <input type="file" ref={logoInputRef} onChange={handleLogoFileUpload} className="hidden" accept="image/*" />
+                    </div>
+
+                    {/* 3. Color Settings */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+                        {/* Primary Color */}
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
+                                <span className='mr-2'>Primary Theme Color:</span>
+                                <span className='text-gray-400'>({brandingSettings.primaryColor})</span>
+                            </label>
+                            <input 
+                                type="color" 
+                                value={brandingSettings.primaryColor} 
+                                onChange={(e) => handleBrandingChange('primaryColor', e.target.value)} 
+                                className="w-full h-10 p-1 border border-gray-300 rounded-lg cursor-pointer" 
+                            />
+                        </div>
+                        {/* Accent Color */}
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
+                                <span className='mr-2'>Accent Theme Color:</span>
+                                <span className='text-gray-400'>({brandingSettings.accentColor})</span>
+                            </label>
+                            <input 
+                                type="color" 
+                                value={brandingSettings.accentColor} 
+                                onChange={(e) => handleBrandingChange('accentColor', e.target.value)} 
+                                className="w-full h-10 p-1 border border-gray-300 rounded-lg cursor-pointer" 
+                            />
+                        </div>
+                    </div>
+
+                    {/* 4. Default Template Selector */}
+                    <div className="border-t pt-4">
+                        <h5 className="text-xs font-bold text-gray-700 mb-2">Default Document Template</h5>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Select Default Template:</label>
+                        <div className="relative">
+                            <select 
+                                value={brandingSettings.defaultTemplateStyle} 
+                                onChange={(e) => handleBrandingChange('defaultTemplateStyle', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm appearance-none pr-8 focus:ring-1 focus:border-1 cursor-pointer"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            >
+                                {TemplateOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        {option.name}: {option.description}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                        </div>
+                    </div>
+
+
+                    {/* 5. Editable Payment & Contact Defaults */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t pt-4">
+                        {/* Payment Details */}
+                        <div>
+                            <h5 className="text-sm font-bold" style={{ color: brandingSettings.primaryColor }}>Default Payment Details</h5>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Account Holder:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.paymentDetails.accountHolder} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountHolder', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Bank Name:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.paymentDetails.bankName} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'bankName', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Account Number:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.paymentDetails.accountNumber} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountNumber', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Payment Note:</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.paymentDetails.paymentNote} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'paymentNote', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                        </div>
+
+                        {/* Contact & Thank You Details */}
+                        <div>
+                            <h5 className="text-sm font-bold" style={{ color: brandingSettings.primaryColor }}>Default Contact Details</h5>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Contact Name (for doc):</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.contactDetails.contactName} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.contactDetails', 'contactName', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                            <label className="block text-xs font-semibold text-gray-700 mb-1 mt-2">Thank You Note (Modern Style Footer):</label>
+                            <input 
+                                type="text" 
+                                value={brandingSettings.contactDetails.thankYouNote} 
+                                onChange={(e) => handleTemplateDetailChange('brandingSettings.contactDetails', 'thankYouNote', e.target.value)} 
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            />
+                            {/* Thank You Note (Template B - Simple Style) */}
+                            <div className='mt-4'>
+                                <h5 className="text-sm font-bold" style={{ color: brandingSettings.primaryColor }}>Simple Style: Thank You Note</h5>
+                                <label className="block text-xs font-semibold text-gray-700 mb-1">Note (Simple Style Footer):</label>
+                                <input 
+                                    type="text" 
+                                    value={brandingSettings.templateBThankYou}
+                                    onChange={(e) => handleBrandingChange('templateBThankYou', e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
+                                    style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div className="mt-8 flex justify-end">
+                    <button 
+                        onClick={onClose} 
+                        className="text-white py-2 px-6 rounded-lg font-semibold hover:opacity-90 transition"
+                        style={{ backgroundColor: brandingSettings.primaryColor }}
+                    >
+                        Close & Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// -------------------------------------------------------------
+// NEW: Main App Component
 // -------------------------------------------------------------
 const App = () => {
-    // Helper to calculate totals based on line items and tax rate
+    // --- STATE MANAGEMENT ---
+    // User Authentication State
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userId, setUserId] = useState('UNAUTHENTICATED');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+
+    // Document & Ledger State (using local storage for persistence)
+    const [brandingSettings, setBrandingSettings] = useState(() => 
+        getInitialState('brandingSettings', defaultBrandingSettings)
+    );
+    // Initialize document with the default template style from branding settings
+    const [currentDoc, setCurrentDoc] = useState(() => 
+        getInitialState('currentDoc', initialData('Invoice', null, brandingSettings.defaultTemplateStyle))
+    );
+    const [documentLedger, setDocumentLedger] = useState(() => 
+        getInitialState('documentLedger', sampleLedger)
+    );
+    const [customerList, setCustomerList] = useState(() => 
+        getInitialState('customerList', tempSampleCustomers)
+    );
+
+    // UI State
+    const [sectionTitle, setSectionTitle] = useState('Invoices'); // 'Invoices', 'Quotations', 'Receipts', 'Customers'
+    const [isEditable, setIsEditable] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile sidebar
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // For New Document dropdown
+    const [isBrandingSettingsOpen, setIsBrandingSettingsOpen] = useState(false); // For Branding Modal
+    const [modal, setModal] = useState({ isVisible: false, message: '' });
+    const [isEditButtonHovered, setIsEditButtonHovered] = useState(false); // New state for hover effect
+
+    // Refs for file inputs
+    const logoInputRef = useRef(null);
+    const fileInputRef = useRef(null); // For data upload
+
+    // Utility to show modal messages
+    const showModal = useCallback((message) => {
+        setModal({ isVisible: true, message });
+    }, []);
+
+
+    // --- UTILITIES / CALCULATIONS ---
+
+    // Recalculates all totals based on line items and tax rate
     const recalculateTotals = (items, taxRate) => {
         const subtotal = items.reduce((sum, item) => sum + (item.qty * item.unitPrice), 0);
         const tax = subtotal * (taxRate / 100);
@@ -883,100 +1565,298 @@ const App = () => {
         return { subtotal, taxRate, tax, totalDue };
     };
 
-    // State for Authentication
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userId, setUserId] = useState(null); // The Firebase user ID
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loginError, setLoginError] = useState('');
 
-    // State for Branding/Color Settings (MODIFIED to use getInitialState for deep merge)
-    const [brandingSettings, setBrandingSettings] = useState(getInitialState('brandingSettings', defaultBrandingSettings));
-    
-    // Use the loaded default template style for initial document state
-    const defaultTemplateFromBranding = brandingSettings.defaultTemplateStyle || 'ModernStyle'; // Updated fallback
+    // --- HANDLERS ---
 
-    // State for Document Data
-    const [documentLedger, setDocumentLedger] = useState(getInitialState('documentLedger', sampleLedger));
-    const [customerList, setCustomerList] = useState(getInitialState('customerList', tempSampleCustomers));
-    const [currentDoc, setCurrentDoc] = useState(initialData('Invoice', null, defaultTemplateFromBranding));
-    
-    // UI State
-    const [sectionTitle, setSectionTitle] = useState('Invoices'); // Current view: 'Invoices', 'Quotations', 'Receipts', 'Customers'
-    const [isEditable, setIsEditable] = useState(false);
-    const [isBrandingSettingsOpen, setIsBrandingSettingsOpen] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [modal, setModal] = useState({ isVisible: false, message: '' });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isEditButtonHovered, setIsEditButtonHovered] = useState(false); // New state for hover effect
-
-    // Refs for file inputs
-    const logoInputRef = useRef(null);
-    const fileInputRef = useRef(null); // For data upload
-
-    // Firebase Auth Listener
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in
-                setIsLoggedIn(true);
-                setUserId(user.uid);
-                // Load data specific to this user/session if needed
+    // Handler for updating branding settings
+    // MODIFIED: Handles nested key changes (e.g., 'paymentDetails.accountNumber') AND updates currentDoc template if defaultTemplateStyle is changed.
+    const handleBrandingChange = (key, value) => {
+        setBrandingSettings(prevSettings => {
+            let newSettings = { ...prevSettings };
+            // Handle nested keys (e.g., 'paymentDetails.accountNumber')
+            if (key.includes('.')) {
+                const parts = key.split('.');
+                const rootKey = parts[0]; // e.g., 'paymentDetails'
+                const subKey = parts[1]; // e.g., 'accountNumber'
+                // Safely update nested object
+                newSettings[rootKey] = {
+                    ...newSettings[rootKey],
+                    [subKey]: value,
+                };
             } else {
-                // User is signed out
-                setIsLoggedIn(false);
-                setUserId(null);
+                newSettings[key] = value;
             }
+            return newSettings;
         });
-
-        // Cleanup listener on unmount
-        return () => unsubscribe();
-    }, []);
-
-
-    // Save data to localStorage whenever it changes
-    useEffect(() => {
-        // Only save state if a user is logged in (simple persistence proxy)
-        if (isLoggedIn) {
-            localStorage.setItem('documentLedger', JSON.stringify(documentLedger));
-            localStorage.setItem('customerList', JSON.stringify(customerList));
-            localStorage.setItem('brandingSettings', JSON.stringify(brandingSettings));
-        }
-    }, [documentLedger, customerList, brandingSettings, isLoggedIn]);
-
-
-    // Recalculate totals whenever line items or tax rate changes
-    useEffect(() => {
-        const { lineItems, totals } = currentDoc;
-        const newTotals = recalculateTotals(lineItems, totals.taxRate);
         
-        // Prevent infinite loop by checking if totals actually changed before setting state
-        if (newTotals.subtotal !== totals.subtotal || newTotals.tax !== totals.tax || newTotals.totalDue !== totals.totalDue) {
+        // FIX: If the default template style is changed, update the current document immediately
+        // to reflect the change without a refresh.
+        if (key === 'defaultTemplateStyle') {
             setCurrentDoc(prevDoc => ({
                 ...prevDoc,
-                totals: newTotals
+                templateStyle: value,
             }));
         }
-    }, [currentDoc.lineItems, currentDoc.totals.taxRate]); // Dependency on lineItems and taxRate
-
-    // Utility to show modal messages
-    const showModal = (message) => {
-        setModal({ isVisible: true, message });
     };
 
-    // Refactored Handler for Firebase Login
-    const handleLogin = async () => {
-        setLoginError(''); // Clear previous errors
+
+    // Generic Handler for updating document details or nested branding details (used in templates/modals)
+    const handleTemplateDetailChange = (section, key, value) => {
+        // Check if the change is targeting a branding setting (which starts with 'brandingSettings')
+        if (section.startsWith('brandingSettings')) {
+            // Check for triple-nested path (e.g., brandingSettings.contactDetails.contactName)
+            if (section.split('.').length > 1) {
+                const parts = section.split('.');
+                // The full key path for the branding handler should be 'contactDetails.contactName'
+                const keyPath = `${parts[1]}.${key}`; 
+                handleBrandingChange(keyPath, value);
+            } else {
+                // If section is just 'brandingSettings', it's a top-level change for branding (like templateBThankYou)
+                 handleBrandingChange(key, value);
+            }
+            return;
+        }
+
+        setCurrentDoc(prevDoc => {
+            const newDoc = { ...prevDoc };
+            // Ensure section exists (e.g., documentDetails, clientDetails, totals)
+            newDoc[section] = { ...newDoc[section], [key]: value };
+
+            // Special logic for totals
+            if (section === 'totals') {
+                // Recalculate if taxRate changes
+                if (key === 'taxRate') {
+                    // Recalculate tax and totalDue based on new taxRate
+                    return { ...newDoc, totals: recalculateTotals(newDoc.lineItems, parseFloat(value) || 0) };
+                }
+            }
+
+            return newDoc;
+        });
+    };
+
+    // Handler for template style change (outside of branding settings)
+    // MODIFIED: This handler now also updates the default template in branding settings
+    const handleTemplateStyleChange = (value) => {
+        // 1. Update the document's templateStyle
+        setCurrentDoc(prevDoc => ({
+            ...prevDoc,
+            templateStyle: value
+        }));
+        // 2. Also update the branding default setting (saves to local storage)
+        handleBrandingChange('defaultTemplateStyle', value);
+    };
+
+    // Handler for line item changes
+    const handleLineItemChange = (index, key, value) => {
+        setCurrentDoc(prevDoc => {
+            const newItems = [...prevDoc.lineItems];
+            const updatedValue = key === 'qty' || key === 'unitPrice' ? parseFloat(value) || 0 : value;
+
+            newItems[index] = { ...newItems[index], [key]: updatedValue };
+
+            // Recalculate amounts for the changed item (if qty or price changed)
+            if (key === 'qty' || key === 'unitPrice') {
+                newItems[index].amount = newItems[index].qty * newItems[index].unitPrice;
+            }
+            
+            // Recalculate totals for the entire document
+            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
+
+            return { ...prevDoc, lineItems: newItems, totals: newTotals };
+        });
+    };
+
+    // Handler to delete a line item
+    const handleDeleteItem = (index) => {
+        setCurrentDoc(prevDoc => {
+            const newItems = prevDoc.lineItems.filter((_, i) => i !== index);
+            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
+            return { ...prevDoc, lineItems: newItems, totals: newTotals };
+        });
+    };
+
+    // Handler to add a new line item
+    const handleAddItem = () => {
+        setCurrentDoc(prevDoc => {
+            const newItems = [...prevDoc.lineItems, { description: '', qty: 1, unitPrice: 0.00, amount: 0.00 }];
+            // No need to recalculate totals immediately as the new item has zero value
+            return { ...prevDoc, lineItems: newItems };
+        });
+    };
+
+    // Handler to save the current document to the ledger and update customer list
+    const handleSaveDocument = () => {
+        // 1. Validate mandatory fields
+        if (!currentDoc.documentDetails.docNo || !currentDoc.clientDetails.name || currentDoc.lineItems.length === 0) {
+            showModal('Error: Document Number, Client Name, and at least one Line Item are required to save.');
+            return;
+        }
+
+        // 2. Determine if it's an existing document or new
+        const isExisting = documentLedger.some(doc => doc.id === currentDoc.id);
+
+        // 3. Update or Add to Ledger
+        setDocumentLedger(prevLedger => {
+            const filteredLedger = prevLedger.filter(doc => doc.id !== currentDoc.id);
+            // Ensure the document details are finalized (recalculating just in case)
+            const finalizedDoc = { 
+                ...currentDoc, 
+                totals: recalculateTotals(currentDoc.lineItems, currentDoc.totals.taxRate)
+            };
+            return [...filteredLedger, finalizedDoc].sort((a, b) => 
+                a.documentDetails.docNo.localeCompare(b.documentDetails.docNo)
+            );
+        });
+
+        // 4. Update or Add to Customer List
+        const customerExists = customerList.some(c => c.id === currentDoc.clientDetails.id && c.id !== 'NEW-CLIENT');
+
+        // Check if the current client is the temporary 'NEW-CLIENT'
+        if (currentDoc.clientDetails.id === 'NEW-CLIENT') {
+             // Create a new unique ID for the customer
+            const newCustomerId = generateDateBasedID('CUST', customerList.length + 1);
+            // Update the document with the new customer ID
+            setCurrentDoc(prevDoc => ({
+                ...prevDoc,
+                clientDetails: {
+                    ...prevDoc.clientDetails,
+                    id: newCustomerId
+                }
+            }));
+            // Add the new customer to the list
+            setCustomerList(prevList => [...prevList, { ...currentDoc.clientDetails, id: newCustomerId }]);
+        } else if (customerExists) {
+            // Update existing customer in the list
+            setCustomerList(prevList => prevList.map(c => 
+                c.id === currentDoc.clientDetails.id ? currentDoc.clientDetails : c
+            ));
+        }
+
+        // 5. Provide feedback
+        showModal(isExisting ? 'Document updated successfully!' : 'New document saved to ledger!');
+        setIsEditable(false); // Exit edit mode after saving
+    };
+
+    // Handler to create a new, blank document
+    const handleNewDocument = (docType) => {
+        // Find the current highest sequence number for 'RS' documents
+        const lastDoc = documentLedger
+            .filter(doc => doc.documentDetails.docNo.startsWith('RS')) // Only count 'RS' documents
+            .sort((a, b) => b.documentDetails.docNo.localeCompare(a.documentDetails.docNo))[0];
+        
+        let sequenceNum = 1;
+        if (lastDoc) {
+            // Extract the sequence number from the ID (the last segment)
+            const parts = lastDoc.documentDetails.docNo.split('-');
+            sequenceNum = parseInt(parts[parts.length - 1], 10) + 1;
+        }
+
+        const newDocId = generateDateBasedID('RS', sequenceNum);
+        const defaultTemplate = brandingSettings.defaultTemplateStyle || 'StyleA';
+
+        // Create a new document object
+        const newDoc = initialData(docType, newDocId, defaultTemplate);
+        // Overwrite the temp ID with the unique ID
+        newDoc.documentDetails.docNo = newDocId;
+
+        setCurrentDoc(newDoc);
+        setSectionTitle(docType + 's'); // Switch the view to the new document type
+        setIsEditable(true); // Always start new documents in edit mode
+        setIsDropdownOpen(false); // Close dropdown
+        setIsSidebarOpen(false); // Close sidebar on mobile
+        showModal(`New ${docType} started.`);
+    };
+
+    // Handler to load a document from the ledger
+    const loadDocumentFromLedger = (docId) => {
+        const docToLoad = documentLedger.find(doc => doc.id === docId);
+        if (docToLoad) {
+            // Ensure the loaded document has a templateStyle for safety
+            const safeDocToLoad = { 
+                ...docToLoad, 
+                // Fallback to the document's template or the current branding default
+                templateStyle: docToLoad.templateStyle || brandingSettings.defaultTemplateStyle || 'StyleA',
+            };
+            setCurrentDoc(safeDocToLoad);
+            setIsEditable(false); // Documents loaded from ledger are not in edit mode by default
+            setIsSidebarOpen(false); // Close sidebar on mobile
+        }
+    };
+
+    // Handler to filter documents for the sidebar
+    const loadCustomerFromList = (customerId) => {
+        const customerToLoad = customerList.find(c => c.id === customerId);
+        if (customerToLoad) {
+            // Create a new Invoice using this customer's details
+            const defaultTemplate = brandingSettings.defaultTemplateStyle || 'StyleA';
+            const newDoc = initialData('Invoice', null, defaultTemplate);
+            // Overwrite client details
+            newDoc.clientDetails = customerToLoad;
+            setCurrentDoc(newDoc);
+            setSectionTitle('Invoices'); // Switch to Invoice editor view
+            setIsEditable(true); // Start editing
+            setIsSidebarOpen(false); // Close sidebar on mobile
+            showModal(`New Invoice started for client ${customerToLoad.name}.`);
+        }
+    };
+
+    // Action to mark current document (Invoice/Quotation) as paid
+    const markAsPaid = () => {
+        if (currentDoc.documentType === 'Receipt') return;
+
+        setCurrentDoc(prevDoc => {
+            const updatedDoc = {
+                ...prevDoc,
+                documentType: 'Receipt', // Convert to Receipt
+                status: 'Paid',
+                documentDetails: {
+                    ...prevDoc.documentDetails,
+                    isPaid: true,
+                    stampText: 'RECEIPT - PAID',
+                },
+            };
+            // Update Ledger
+            setDocumentLedger(prevLedger => {
+                const filteredLedger = prevLedger.filter(doc => doc.id !== prevDoc.id);
+                return [...filteredLedger, updatedDoc].sort((a, b) => 
+                    a.documentDetails.docNo.localeCompare(b.documentDetails.docNo)
+                );
+            });
+            showModal(`Document ${prevDoc.documentDetails.docNo} marked as Paid and converted to Receipt.`);
+            return updatedDoc;
+        });
+
+        setIsEditable(false);
+    };
+
+    // Action to delete document from ledger and reset view
+    const handleDeleteDocument = () => {
+        if (window.confirm(`Are you sure you want to permanently delete document ${currentDoc.documentDetails.docNo}? This cannot be undone.`)) {
+            setDocumentLedger(prevLedger => prevLedger.filter(doc => doc.id !== currentDoc.id));
+            
+            // Reset to a fresh invoice
+            setCurrentDoc(initialData('Invoice', null, brandingSettings.defaultTemplateStyle));
+            setIsEditable(true);
+            showModal(`Document ${currentDoc.documentDetails.docNo} deleted.`);
+        }
+    };
+
+
+    // Handler for Firebase Login
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoginError('');
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // Auth state listener handles setting isLoggedIn/userId
+            // Auth state listener (onAuthStateChanged) will handle setting isLoggedIn and userId.
             showModal('Login successful!');
+            setEmail('');
+            setPassword('');
         } catch (error) {
-            // Firebase error codes are specific. We can generalize the message.
-            const errorMessage = error.message.includes('auth/invalid-credential') 
-                ? 'Invalid email or password. Please try again.' 
-                : error.message;
+            console.error("Firebase Login Error:", error);
+            const errorMessage = error.code === 'auth/invalid-credential' ? 
+                'Invalid email or password. Please try again.' : error.message;
             setLoginError(errorMessage);
         }
     };
@@ -985,276 +1865,64 @@ const App = () => {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            // Auth state listener (onAuthStateChanged) will handle setting isLoggedIn and userId to UNAUTHENTICATED/false.
-            showModal('You have been successfully logged out!');
+            // Auth state listener (onAuthStateChanged) will handle setting isLoggedIn and userId to UNAUTHENTICATED.
+            showModal('Logged out successfully.');
         } catch (error) {
             console.error("Firebase Logout Error:", error.message);
-            showModal(`Logout failed: ${error.message}`);
+            showModal('Error logging out.');
         }
     };
 
-    // MODIFIED: Generic handler for detail changes, including nested branding settings
-    const handleTemplateDetailChange = (section, key, value) => {
-        // 1. Check if the section refers to brandingSettings (using dot notation for nesting)
-        if (section.startsWith('brandingSettings')) {
-            setBrandingSettings(prev => {
-                const parts = section.split('.'); // e.g., ['brandingSettings', 'paymentDetails']
-                let newState = { ...prev };
-                
-                if (parts.length === 1) {
-                    // Top-level branding change (e.g., 'companyName' or 'defaultTemplateStyle')
-                    newState = { ...newState, [key]: value };
-                } else if (parts.length === 2 && newState[parts[1]]) {
-                    // Nested branding change (e.g., 'brandingSettings.paymentDetails')
-                    const nestedKey = parts[1];
-                    newState[nestedKey] = {
-                        ...newState[nestedKey],
-                        [key]: value
-                    };
-                }
-                return newState;
-            });
-            return;
-        }
-
-        // 2. Handle normal document changes
-        setCurrentDoc(prevDoc => {
-            if (prevDoc[section]) {
-                return {
-                    ...prevDoc,
-                    [section]: {
-                        ...prevDoc[section],
-                        [key]: value
-                    }
-                };
+    // Firebase Auth Listener
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                setIsLoggedIn(true);
+                setUserId(user.uid);
+            } else {
+                // User is signed out
+                setIsLoggedIn(false);
+                setUserId('UNAUTHENTICATED');
             }
-            return prevDoc;
         });
-    };
-    
-    // Handler specifically for branding settings (top-level properties only)
-    const handleBrandingChange = (key, value) => {
-        // This is a simpler version that can be used for top-level branding properties only (colors, name, logoUrl)
-        setBrandingSettings(prev => ({
-            ...prev,
-            [key]: value,
-        }));
-    };
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, []); 
+
+    // Local Storage Persistence Hooks
+    useEffect(() => {
+        // Save document ledger and customer list
+        localStorage.setItem('documentLedger', JSON.stringify(documentLedger));
+        localStorage.setItem('customerList', JSON.stringify(customerList));
+    }, [documentLedger, customerList]);
+
+    useEffect(() => {
+        // Save branding settings
+        localStorage.setItem('brandingSettings', JSON.stringify(brandingSettings));
+    }, [brandingSettings]);
+
+    useEffect(() => {
+        // Save current editor state
+        localStorage.setItem('currentDoc', JSON.stringify(currentDoc));
+    }, [currentDoc]);
 
 
-    const handleLineItemChange = useCallback((index, key, value) => {
-        setCurrentDoc(prevDoc => {
-            const newItems = prevDoc.lineItems.map((item, i) => {
-                if (i === index) {
-                    // Ensure quantities and prices are numbers
-                    let newValue = value;
-                    if (key === 'qty' || key === 'unitPrice') {
-                        // Parse as float, fallback to 0 if invalid
-                        newValue = parseFloat(value) || 0;
-                    }
+    // File Handlers for Backup/Restore
 
-                    const updatedItem = { ...item, [key]: newValue };
-                    // Recalculate amount for the updated item
-                    updatedItem.amount = updatedItem.qty * updatedItem.unitPrice;
-                    return updatedItem;
-                }
-                return item;
-            });
-
-            // Recalculate totals based on new items and existing tax rate
-            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
-
-            return {
-                ...prevDoc,
-                lineItems: newItems,
-                totals: newTotals,
-            };
-        });
-    }, [recalculateTotals]);
-
-    const handleAddItem = () => {
-        setCurrentDoc(prevDoc => {
-            const newItem = { description: 'New Line Item', qty: 1, unitPrice: 0.00, amount: 0.00 };
-            const newItems = [...prevDoc.lineItems, newItem];
-            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
-
-            return {
-                ...prevDoc,
-                lineItems: newItems,
-                totals: newTotals,
-            };
-        });
-    };
-
-    const handleDeleteItem = (index) => {
-        setCurrentDoc(prevDoc => {
-            const newItems = prevDoc.lineItems.filter((_, i) => i !== index);
-            const newTotals = recalculateTotals(newItems, prevDoc.totals.taxRate);
-
-            return {
-                ...prevDoc,
-                lineItems: newItems,
-                totals: newTotals,
-            };
-        });
-    };
-
-    // Handler for selecting an existing customer
-    const handleSelectCustomer = (customerId) => {
-        const customer = customerList.find(c => c.id === customerId);
-        if (customer) {
-            setCurrentDoc(prevDoc => ({
-                ...prevDoc,
-                clientDetails: customer,
-            }));
-        }
-    };
-    
-    // Handler for saving the current document
-    const saveCurrentDocument = () => {
-        // Ensure a doc number is generated if it's the initial temporary one (999)
-        if (currentDoc.documentDetails.docNo.includes('999')) {
-            const newSequence = documentLedger.length + 1; // Simple sequence counter
-            const newDocId = generateDateBasedID('RS', newSequence);
-
-            const newDoc = {
-                ...currentDoc,
-                id: newDocId, // Update the unique ID
-                documentDetails: {
-                    ...currentDoc.documentDetails,
-                    docNo: newDocId, // Update the document number
-                },
-                // Documents created from scratch start as Draft/Outstanding/Pending unless its a Receipt
-                status: currentDoc.documentType === 'Receipt' ? 'Paid' : (currentDoc.documentType === 'Quotation' ? 'Pending' : 'Outstanding'),
-            };
-
-            // Add the new document to the ledger
-            setDocumentLedger(prevLedger => [
-                newDoc,
-                ...prevLedger, // Add new documents to the start of the list
-            ]);
-            
-            setCurrentDoc(newDoc); // Load the finalized document back into the editor
-            showModal(`New ${newDoc.documentType} ${newDoc.documentDetails.docNo} saved successfully!`);
-
-        } else {
-            // Update existing document in the ledger
-            setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === currentDoc.id ? currentDoc : doc));
-            showModal(`${currentDoc.documentType} ${currentDoc.documentDetails.docNo} updated successfully!`);
-        }
-        setIsEditable(false); // Disable editing after save
-    };
-    
-    // Handler for creating a new document of a specified type
-    const createNewDocument = (docType) => {
-        setCurrentDoc(initialData(docType, null, brandingSettings.defaultTemplateStyle)); // Use the default template from branding
-        setIsEditable(true);
-        setIsDropdownOpen(false); // Close the 'New' dropdown
-        setSectionTitle(docType === 'Invoice' ? 'Invoices' : (docType === 'Quotation' ? 'Quotations' : 'Receipts'));
-        setIsSidebarOpen(false); // Close sidebar on mobile
-    };
-
-    // Function to filter documents for display in the sidebar
-    const getFilteredDocs = (title) => {
-        if (title === 'Customers') {
-            return customerList; // Return the customer list for the customer view
-        }
-        
-        const typeMap = {
-            'Invoices': 'Invoice',
-            'Quotations': 'Quotation',
-            'Receipts': 'Receipt',
-        };
-        const docType = typeMap[title];
-        
-        // Filter by document type
-        return documentLedger.filter(doc => doc.documentType === docType)
-                             .sort((a, b) => new Date(b.documentDetails.date) - new Date(a.documentDetails.date)); // Sort by date descending
-    };
-
-    // Handler to load a document from the sidebar list
-    const loadDocumentFromLedger = (docId) => {
-        const docToLoad = documentLedger.find(doc => doc.id === docId);
-        if (docToLoad) {
-            // Ensure the loaded document has a templateStyle for safety
-            const safeDocToLoad = { ...docToLoad, templateStyle: docToLoad.templateStyle || 'ModernStyle' }; // Updated fallback
-            setCurrentDoc(safeDocToLoad);
-            // Documents loaded from the ledger are not editable by default
-            setIsEditable(false);
-            // Close dropdown if open
-            setIsDropdownOpen(false);
-            // Close sidebar on mobile after selection
-            setIsSidebarOpen(false);
-        }
-    };
-    
-    // Placeholder for marking an invoice as paid and moving to Receipts
-    const markAsPaid = () => {
-        if (currentDoc.documentType === 'Invoice' && currentDoc.status === 'Outstanding') {
-            // 1. Update the document's type and status
-            const paidDoc = { 
-                ...currentDoc, 
-                documentType: 'Receipt', 
-                status: 'Paid', 
-                documentDetails: { 
-                    ...currentDoc.documentDetails, 
-                    isPaid: true, 
-                    stampText: 'PAID' 
-                } 
-            };
-            
-            // 2. Update the Ledger with the paid document
-            setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === paidDoc.id ? paidDoc : doc) );
-            
-            // 3. Load the paid document into the editor
-            setCurrentDoc(paidDoc);
-            setIsEditable(false);
-            showModal(`Invoice ${paidDoc.documentDetails.docNo} marked as Paid and updated in the Receipts ledger!`);
-        }
-    };
-
-    // NEW: Handler for marking a quotation as approved/converted to an invoice
-    const handleApproveQuotation = () => {
-        if (currentDoc.documentType === 'Quotation' && currentDoc.status === 'Pending') {
-            // 1. Convert to Invoice
-            const invoiceDoc = { 
-                ...currentDoc, 
-                documentType: 'Invoice', 
-                status: 'Outstanding', // New invoices are outstanding
-                documentDetails: { 
-                    ...currentDoc.documentDetails, 
-                    isPaid: false, // Invoices are not paid by default
-                    stampText: '', 
-                } 
-            };
-            
-            // 2. Update the Ledger (This replaces the old quotation document)
-            setDocumentLedger(prevLedger => prevLedger.map(doc => doc.id === invoiceDoc.id ? invoiceDoc : doc) );
-            
-            // 3. Load the new invoice into the editor
-            setCurrentDoc(invoiceDoc);
-            setIsEditable(false);
-            showModal(`Quotation ${invoiceDoc.documentDetails.docNo} approved and converted to an Outstanding Invoice!`);
-        }
-    };
-
-    // Handler for logo file input click
-    const handleLogoUploadClick = () => {
-        logoInputRef.current.click();
-    };
-
-    // Handler for logo file selection
+    // Handler for logo file upload
     const handleLogoFileUpload = (event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                // Update branding settings with the Base64 URL
-                handleBrandingChange('logoUrl', reader.result);
-            };
-            reader.readAsDataURL(file); // Convert file to Base64 data URL
-            showModal('Logo uploaded successfully!');
-        }
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // Update branding settings with the Base64 URL
+            handleBrandingChange('logoUrl', reader.result);
+        };
+        reader.readAsDataURL(file); // Convert file to Base64 data URL
+        showModal('Logo uploaded successfully!');
     };
 
     // Function to handle data backup (download)
@@ -1267,31 +1935,23 @@ const App = () => {
             brandingSettings: brandingSettings, // INCLUDE BRANDING SETTINGS
             // currentDoc is intentionally excluded as it's an editor state, not core data
         };
-
         const jsonString = JSON.stringify(backupData, null, 2); // prettify the JSON
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
+
         // Create a link element to trigger the download
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `RS_Finance_Backup_${new Date().toISOString().split('T')[0]}.json`;
-        
-        // Append to body, click, and remove
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        showModal('Application data backup downloaded successfully!');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `rsfinance_backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showModal('Data backup downloaded successfully!');
     };
 
-    // Function to trigger the file input dialog
-    const handleUploadClick = () => {
-        fileInputRef.current.click();
-    };
-
-    // Function to handle the file selection and upload
-    const handleFileUpload = (event) => {
+    // Function to handle data restore (upload)
+    const handleRestoreData = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1299,74 +1959,69 @@ const App = () => {
         reader.onload = (e) => {
             try {
                 const uploadedData = JSON.parse(e.target.result);
-                
-                // Basic validation and safe assignment
-                if (uploadedData.documentLedger && Array.isArray(uploadedData.documentLedger)) {
+                if (uploadedData.documentLedger && uploadedData.customerList) {
+                    // Update main states
                     setDocumentLedger(uploadedData.documentLedger);
-                }
-                if (uploadedData.customerList && Array.isArray(uploadedData.customerList)) {
                     setCustomerList(uploadedData.customerList);
-                }
-                
-                // Update userId, but do NOT set isLoggedIn state directly.
-                // The Firebase listener should manage isLoggedIn based on the auth session.
-                if (uploadedData.userId) {
-                    setUserId(uploadedData.userId);
-                }
-                
-                if (uploadedData.brandingSettings) {
-                    // Use a functional update to safely merge old defaults with uploaded data
+                    // Update branding settings, merging old defaults with uploaded data
                     setBrandingSettings(getInitialState('brandingSettings', uploadedData.brandingSettings));
+                    // Check if currentDoc should be reset or kept, for simplicity, we keep it as is.
+                    showModal('Data restored successfully!');
+                } else {
+                    showModal('Error: Uploaded file is not a valid RS Finance backup.');
                 }
-                
-                showModal('Application data restored successfully!');
-
             } catch (error) {
-                console.error("Error parsing or restoring file:", error);
-                showModal('Error restoring data: Invalid file format.');
+                console.error("Data Restore Error:", error);
+                showModal('Error parsing uploaded file. Please ensure it is a valid JSON backup file.');
             }
         };
         reader.readAsText(file);
-
-        // Clear the input value so the same file can be uploaded again
-        event.target.value = null;
     };
 
-    // Counts for sidebar badges
-    const invoiceCount = getFilteredDocs('Invoices').length;
-    const quotationCount = getFilteredDocs('Quotations').length;
-    const receiptCount = getFilteredDocs('Receipts').length;
-    const customerCount = customerList.length;
 
-    const navItems = [
-        { title: 'Invoices', icon: DollarSign, count: invoiceCount },
-        { title: 'Quotations', icon: FileText, count: quotationCount },
-        { title: 'Receipts', icon: Save, count: receiptCount },
-        { title: 'Customers', icon: Users, count: customerCount },
+    // --- FILTERED DATA FOR SIDEBAR NAVIGATION ---
+
+    const filteredLedger = (type) => documentLedger.filter(doc => 
+        (type === 'Invoices' && doc.documentType === 'Invoice') ||
+        (type === 'Quotations' && doc.documentType === 'Quotation') ||
+        (type === 'Receipts' && doc.documentType === 'Receipt')
+    ).sort((a, b) => b.documentDetails.docNo.localeCompare(a.documentDetails.docNo)); // Sort descending by DocNo
+
+
+    const sidebarNavigation = [
+        { id: 1, title: 'Invoices', icon: FileText, count: filteredLedger('Invoices').length },
+        { id: 2, title: 'Quotations', icon: FileText, count: filteredLedger('Quotations').length },
+        { id: 3, title: 'Receipts', icon: FileText, count: filteredLedger('Receipts').length },
+        { id: 4, title: 'Customers', icon: Users, count: customerList.length },
     ];
 
-    // --- Login Screen (UPDATED FOR FIREBASE) ---
+
+    // --- COMPONENT RENDERING LOGIC ---
+
+    // Conditional render for Login page
     if (!isLoggedIn) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <div className="p-8 bg-white shadow-xl rounded-xl w-96">
-                    {/* REPLACED hardcoded text color with inline style */}
-                    <h2 className="text-3xl font-extrabold mb-6 text-center" style={{ color: brandingSettings.primaryColor }}>RS Finance Login</h2>
-                    
-                    {/* Display Error Message */}
-                    {loginError && (
-                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm font-medium">
-                            {loginError}
-                        </div>
-                    )}
-                    
-                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Email</label>
-                            <input 
-                                type="email" 
-                                placeholder="user@rsfinance.co.za" 
-                                required 
+            <div className="flex h-screen items-center justify-center bg-gray-100">
+                <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-extrabold" style={{ color: brandingSettings.primaryColor }}>
+                            RS Finance App
+                        </h1>
+                        <p className="mt-2 text-sm text-gray-500">Sign in to manage your documents</p>
+                    </div>
+
+                    <form className="space-y-4" onSubmit={handleLogin}>
+                        {loginError && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-xs" role="alert">
+                                {loginError}
+                            </div>
+                        )}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input
+                                type="email"
+                                placeholder="you@example.com"
+                                required
                                 value={email} // BIND STATE
                                 onChange={(e) => setEmail(e.target.value)} // UPDATE STATE
                                 // REPLACED hardcoded focus border color with inline style
@@ -1374,12 +2029,12 @@ const App = () => {
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             />
                         </div>
-                        <div className="mb-6">
+                        <div>
                             <label className="block text-sm font-medium text-gray-700">Password</label>
-                            <input 
-                                type="password" 
-                                placeholder="Enter password" 
-                                required 
+                            <input
+                                type="password"
+                                placeholder="Enter password"
+                                required
                                 value={password} // BIND STATE
                                 onChange={(e) => setPassword(e.target.value)} // UPDATE STATE
                                 // REPLACED hardcoded focus border color with inline style
@@ -1387,10 +2042,10 @@ const App = () => {
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             />
                         </div>
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             // REPLACED hardcoded background color with inline style
-                            className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition duration-200"
+                            className="w-full text-white py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition shadow-lg"
                             style={{ backgroundColor: brandingSettings.primaryColor }}
                         >
                             <LogIn size={20} className="inline mr-2" /> Log In
@@ -1400,11 +2055,11 @@ const App = () => {
             </div>
         );
     }
-    
-    // --- Main Application UI ---
+
+    // --- MAIN APPLICATION LAYOUT ---
     return (
-        <div className="flex min-h-screen bg-gray-50 print:block">
-            
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
+            {/* Modal for Messages */}
             <ModalMessage 
                 message={modal.message} 
                 isVisible={modal.isVisible} 
@@ -1413,565 +2068,373 @@ const App = () => {
             />
 
             {/* Branding Settings Modal */}
-            {isBrandingSettingsOpen && (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 print:hidden">
-                    {/* Max width and size adjustment */}
-                    <div className="p-4 rounded-lg shadow-2xl bg-white ring-1 ring-black ring-opacity-5 z-20 max-h-[90vh] overflow-y-auto w-11/12 max-w-lg">
-                        <h4 className="text-sm font-bold text-gray-700 mb-4 border-b pb-1">Customize Branding</h4>
-                        
-                        {/* 1. Company Name */}
-                        <div className="mb-4">
-                            <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center">
-                                <User2 size={14} className='mr-1' /> Company Name:
-                            </label>
-                            <input 
-                                type="text" 
-                                value={brandingSettings.companyName} 
-                                onChange={(e) => handleBrandingChange('companyName', e.target.value)}
-                                // REPLACED hardcoded focus border color with inline style
-                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                            />
-                        </div>
-                        
-                        {/* 2. Logo Upload/URL */}
-                        <div className="mb-4 border-t pt-4">
-                            <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
-                                <ImageIcon size={14} className='mr-1' /> Logo Upload:
-                            </label>
-                            <div className='flex space-x-2 items-center'>
-                                <button 
-                                    // REPLACED hardcoded background color with inline style
-                                    onClick={handleLogoUploadClick} 
-                                    className='shrink-0 text-white py-1 px-3 rounded-lg text-sm hover:opacity-80 transition'
-                                    style={{ backgroundColor: brandingSettings.primaryColor }}
-                                >
-                                    Upload File
-                                </button>
-                                <img src={brandingSettings.logoUrl} alt="Current Logo" className='w-12 h-12 object-contain border rounded' />
-                            </div>
-                            <input 
-                                type="file" 
-                                ref={logoInputRef} 
-                                onChange={handleLogoFileUpload} 
-                                className="hidden" 
-                                accept="image/*"
-                            />
-                            <label className="block text-xs font-semibold text-gray-700 mt-3 mb-1">Logo URL / Base64:</label>
-                            <textarea 
-                                value={brandingSettings.logoUrl} 
-                                onChange={(e) => handleBrandingChange('logoUrl', e.target.value)}
-                                // REPLACED hardcoded focus border color with inline style
-                                className="w-full p-2 border border-gray-300 rounded-lg text-xs h-16 resize-none focus:ring-1 focus:border-1"
-                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                placeholder="Paste Image URL or Base64 content here..."
-                            />
-                        </div>
+            <BrandingSettingsModal 
+                isOpen={isBrandingSettingsOpen} 
+                onClose={() => setIsBrandingSettingsOpen(false)} 
+                brandingSettings={brandingSettings} 
+                handleBrandingChange={handleBrandingChange}
+                handleTemplateDetailChange={handleTemplateDetailChange}
+                handleLogoFileUpload={handleLogoFileUpload}
+                logoInputRef={logoInputRef}
+            />
 
-                        {/* 3. Company Info Details (address, phone, email, vatNo) - Grid Layout */}
-                        <div className="mb-4 border-t pt-4">
-                             <h5 className="text-xs font-bold text-gray-700 mb-2">Company Information</h5>
-                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                                {Object.entries(brandingSettings.companyInfo).map(([key, value]) => (
-                                    <div key={key}>
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1')}:</label>
-                                        <input
-                                            type="text"
-                                            value={value}
-                                            onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', key, e.target.value)}
-                                            className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                            style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* 4. Payment Details Section (New Addition) */}
-                        <div className="mb-4 border-t pt-4">
-                             <h5 className="text-xs font-bold text-gray-700 mb-2">Payment Details (Editable Footer Info)</h5>
-                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                                {/* Account Holder */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Account Holder:</label>
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.paymentDetails.accountHolder}
-                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountHolder', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                                {/* Bank Name */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Bank Name:</label>
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.paymentDetails.bankName}
-                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'bankName', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                                {/* Account Number */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Account Number:</label>
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.paymentDetails.accountNumber}
-                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'accountNumber', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                                {/* Payment Note */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Payment Note:</label>
-                                    <input
-                                        type="text"
-                                        value={brandingSettings.paymentDetails.paymentNote}
-                                        onChange={(e) => handleTemplateDetailChange('brandingSettings.paymentDetails', 'paymentNote', e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-
-                        {/* 5. Template Selection (Default) - UPDATED TO USE 6 OPTIONS */}
-                        <div className="mb-4 border-t pt-4">
-                            <label className="block text-xs font-semibold text-gray-700 mb-2 flex items-center">
-                                <Layout size={14} className='mr-1' /> Default Document Template:
-                            </label>
-                            <select 
-                                value={brandingSettings.defaultTemplateStyle}
-                                onChange={(e) => handleBrandingChange('defaultTemplateStyle', e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                            >
-                                {TemplateOptions.map(option => (
-                                    <option key={option.id} value={option.id}>
-                                        {option.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {TemplateOptions.find(o => o.id === brandingSettings.defaultTemplateStyle)?.description || 'Select a template style.'}
-                            </p>
-                        </div>
-
-                        {/* 6. Color Pickers */}
-                        <div className="flex space-x-4 border-t pt-4">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Primary Color (Headers/Main):</label>
-                                <div className="flex items-center space-x-2">
-                                    <input 
-                                        type="color" 
-                                        value={brandingSettings.primaryColor} 
-                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)} 
-                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer" 
-                                    />
-                                    <input 
-                                        type="text" 
-                                        value={brandingSettings.primaryColor} 
-                                        onChange={(e) => handleBrandingChange('primaryColor', e.target.value)} 
-                                        // REPLACED hardcoded focus border color with inline style
-                                        className="flex-1 p-1 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-700 mb-1">Accent Color (Logo/Highlight):</label>
-                                <div className="flex items-center space-x-2">
-                                    <input 
-                                        type="color" 
-                                        value={brandingSettings.accentColor} 
-                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)} 
-                                        className="w-8 h-8 rounded-full border-none p-0 cursor-pointer" 
-                                    />
-                                    <input 
-                                        type="text" 
-                                        value={brandingSettings.accentColor} 
-                                        onChange={(e) => handleBrandingChange('accentColor', e.target.value)} 
-                                        // REPLACED hardcoded focus border color with inline style
-                                        className="flex-1 p-1 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                        style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Close Button */}
-                        <button 
-                            onClick={() => setIsBrandingSettingsOpen(false)} 
-                            className="mt-6 w-full py-2 bg-gray-200 rounded-lg text-gray-800 font-semibold hover:bg-gray-300 transition"
-                        >
-                            Close Settings
-                        </button>
-                    </div>
-                </div>
-            )}
-
-
-            {/* 1. SIDEBAR NAVIGATION - UPDATED FOR RESPONSIVENESS AND COUNTS */}
+            {/* Mobile Menu Overlay */}
             <div 
-                // Conditional classes for mobile sidebar overlay vs. desktop fixed sidebar
-                className={`w-64 p-4 flex-shrink-0 flex-col shadow-xl print:hidden ${isSidebarOpen ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden md:flex'}` }
+                className={`fixed inset-0 bg-black bg-opacity-50 z-30 transition-opacity ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'} lg:hidden`}
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
+
+            {/* Sidebar (Navigation) - MADE RESPONSIVE */}
+            <nav
+                // MOBILE FRIENDLY CHANGE: Use fixed/transform for mobile, relative for desktop
+                // ADDED: flex flex-col h-full to enable vertical layout and scrolling
+                className={`fixed inset-y-0 left-0 transform w-64 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out p-4 flex-shrink-0 z-40 print:hidden flex flex-col h-full`}
                 style={{ backgroundColor: brandingSettings.primaryColor }}
             >
-                
-                {/* Mobile Close Button */}
-                <button 
-                    onClick={() => setIsSidebarOpen(false)} 
-                    className="md:hidden absolute top-4 right-4 text-white hover:opacity-80 z-50"
-                >
-                    <X size={24} />
-                </button>
-
-                {/* Logo/Title */}
-                <div className="mb-6 pt-2 pb-4 border-b border-white/20">
-                    <h1 className="text-xl font-bold text-white">
-                        {brandingSettings.companyName.split(' ')[0]} 
-                        <span style={{ color: brandingSettings.accentColor }}> 
-                            {brandingSettings.companyName.split(' ').slice(1).join(' ')}
-                        </span>
-                    </h1>
-                    <p className='text-xs text-white/70'>Finance Manager</p>
+                {/* Logo / Title (FIXED HEADER) */}
+                <div className="text-2xl font-bold text-white mb-6 flex items-center justify-between">
+                    <span>{brandingSettings.companyName.split(' ')[0]} <span style={{ color: brandingSettings.accentColor }}>{brandingSettings.companyName.split(' ').slice(1).join(' ')}</span></span>
+                    <button onClick={() => setIsSidebarOpen(false)} className="text-white lg:hidden">
+                        <X size={24} />
+                    </button>
                 </div>
 
-                {/* Primary Navigation - Document Types */}
-                <nav className="space-y-1">
-                    {navItems.map(item => (
-                        <div 
-                            key={item.title}
-                            onClick={() => {
-                                setSectionTitle(item.title);
-                                setSearchQuery(''); // Clear search when switching sections
-                                setIsSidebarOpen(false); // Close sidebar on mobile after selection
-                            }}
-                            // Dynamic background color for selected section
-                            className={`flex items-center p-3 text-sm font-medium rounded-lg transition duration-150 cursor-pointer ${
-                                sectionTitle === item.title 
-                                    ? 'text-gray-900 shadow-md'
-                                    : 'text-white/90 hover:bg-white/20'
-                            }`}
-                            style={sectionTitle === item.title ? { backgroundColor: 'white' } : {}}
-                        >
-                            <item.icon 
-                                size={20} 
-                                className="mr-3" 
-                                // Dynamic icon color for selected section
-                                style={sectionTitle === item.title ? { color: brandingSettings.primaryColor } : { color: 'white' }}
-                            />
-                            <span className="flex-1">
-                                {item.title}
-                            </span>
-                            {/* Badge with Count */}
-                            <span 
-                                className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-                                    sectionTitle === item.title 
-                                        ? 'text-white' 
-                                        : 'bg-white text-gray-900'
-                                }`}
-                                style={sectionTitle === item.title ? { backgroundColor: brandingSettings.accentColor } : {}}
+                {/* Main Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto pb-4">
+                
+                    {/* Main Navigation Links */}
+                    <div className="flex flex-col space-y-2">
+                        {sidebarNavigation.map(item => (
+                            <div 
+                                key={item.id}
+                                // REPLACED hardcoded background color/opacity with inline style
+                                className={`flex items-center text-white py-2 px-3 rounded-lg font-semibold cursor-pointer transition ${sectionTitle === item.title ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                                onClick={() => {
+                                    setSectionTitle(item.title);
+                                    setIsSidebarOpen(false); // Close sidebar on mobile after selection
+                                }}
                             >
-                                {item.count}
-                            </span>
-                        </div>
-                    ))}
-                </nav>
+                                <item.icon size={20} className="mr-3" style={{ color: brandingSettings.accentColor }} />
+                                <span className="flex-1"> {item.title} </span>
+                                {/* Badge with Count */}
+                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${sectionTitle === item.title ? 'bg-gray-200 text-gray-700' : 'bg-white/20 text-white'}`}>
+                                    {item.count}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
 
-                {/* Search Bar for Documents/Customers */}
-                <div className="mt-6 mb-4 relative">
-                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input 
-                        type="text" 
-                        placeholder={`Search ${sectionTitle.toLowerCase()}...`}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full py-2 pl-10 pr-4 text-sm rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-white bg-white/90 text-gray-800"
-                    />
-                </div>
-                
-                {/* Secondary Navigation - Document List / Customer List (Removed redundant count badge from Customers header) */}
-                <nav className="flex-1 overflow-y-auto space-y-4 pr-1 text-white/90">
-                    {/* List of documents/customers */}
-                    {sectionTitle === 'Customers' ? (
-                        // Customer List View
-                        <div key="Customers">
-                            {/* Removed count badge from H3 as it's now in the main navigation */}
-                            <h3 className="flex items-center p-2 text-sm font-bold uppercase border-b border-white/20 mb-1">
-                                CUSTOMERS
-                            </h3>
-                            <div className="space-y-1 pl-4">
-                                {getFilteredDocs('Customers')
-                                    .filter(c => 
-                                        c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                        c.company.toLowerCase().includes(searchQuery.toLowerCase())
-                                    )
-                                    .map(customer => (
-                                    <div 
-                                        key={customer.id} 
-                                        className="block p-1 text-xs rounded-lg transition duration-100 hover:bg-white/10"
-                                        title={customer.company}
-                                        onClick={() => {
-                                            // Create a dummy document to view the customer details in the editor if needed
-                                            setCurrentDoc(initialData('Invoice', null, brandingSettings.defaultTemplateStyle));
-                                            handleSelectCustomer(customer.id);
-                                            setIsEditable(false);
-                                            setIsSidebarOpen(false);
-                                        }}
+                    {/* New Document Button */}
+                    <div className="mt-6 border-t border-white/20 pt-4 relative">
+                        <button 
+                            onClick={() => setIsDropdownOpen(prev => !prev)}
+                            className="w-full flex items-center justify-center text-white py-2 px-4 rounded-lg font-bold hover:opacity-90 transition shadow-md bg-white/30"
+                        >
+                            <Plus size={18} className="mr-2" /> Create New <ChevronDown size={18} className="ml-2" />
+                        </button>
+                        {/* New Document Dropdown */}
+                        {isDropdownOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl overflow-hidden z-50">
+                                {['Invoice', 'Quotation', 'Receipt'].map(type => (
+                                    <button 
+                                        key={type} 
+                                        onClick={() => handleNewDocument(type)}
+                                        // REPLACED hardcoded text color with inline style
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                        style={{ color: brandingSettings.primaryColor }}
                                     >
-                                        <p className='font-bold'>{customer.name}</p>
-                                        <p className='text-white/70'>{customer.company}</p>
+                                        New {type}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Document List (Ledger) */}
+                    {/* Only show ledger if not viewing customers */}
+                    {sectionTitle !== 'Customers' && (
+                        // REMOVED: overflow-y-auto flex-1, now handled by parent
+                        <div className="mt-8">
+                            <h3 className="text-sm font-bold uppercase text-white/70 mb-2">{sectionTitle} ({filteredLedger(sectionTitle).length})</h3>
+                            <div className='space-y-2'>
+                                {filteredLedger(sectionTitle).map(doc => (
+                                    <div
+                                        key={doc.id}
+                                        onClick={() => loadDocumentFromLedger(doc.id)}
+                                        // REPLACED hardcoded border color with inline style
+                                        className={`p-3 rounded-lg cursor-pointer transition border ${currentDoc.id === doc.id ? 'bg-white text-gray-800 border-white' : 'hover:bg-white/10 text-white border-white/40'}`}
+                                    >
+                                        <p className="text-sm font-semibold">{doc.documentDetails.docNo}</p>
+                                        <p className="text-xs">{doc.clientDetails.name} ({doc.clientDetails.company})</p>
+                                        <div className="flex justify-between items-center text-xs mt-1">
+                                            <span className={`py-0.5 px-2 rounded-full text-xs font-medium ${doc.status === 'Paid' ? 'bg-green-500 text-white' : doc.status === 'Outstanding' ? 'bg-red-500 text-white' : 'bg-yellow-500 text-gray-900'}`}>
+                                                {doc.status}
+                                            </span>
+                                            <span className={currentDoc.id === doc.id ? 'text-gray-500' : 'text-white/70'}>
+                                                {doc.documentDetails.date}
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    ) : (
-                        // Document List View
-                        ['Invoices', 'Quotations', 'Receipts'].map(title => {
-                            // Filter the ledger based on the section title
-                            if (title !== sectionTitle) return null; // Only show the current section
-                            
-                            const filteredDocs = getFilteredDocs(title)
-                                .filter(doc => 
-                                    // Simple search filter by document number, customer company, or name
-                                    doc.documentDetails.docNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    doc.clientDetails.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    doc.clientDetails.name.toLowerCase().includes(searchQuery.toLowerCase())
-                                );
-
-                            return (
-                                <div key={title}>
-                                    <h3 className="flex items-center p-2 text-sm font-bold uppercase border-b border-white/20 mb-1">
-                                        {title}
-                                    </h3>
-                                    <div className="space-y-1 pl-4">
-                                        {filteredDocs.length > 0 ? (
-                                            filteredDocs.map(doc => (
-                                                <div 
-                                                    key={doc.id} 
-                                                    className={`block p-1 text-xs rounded-lg transition duration-100 hover:bg-white/10 cursor-pointer ${currentDoc.id === doc.id ? 'bg-white/30' : ''}`}
-                                                    onClick={() => loadDocumentFromLedger(doc.id)}
-                                                >
-                                                    <p className='font-bold'>{doc.documentDetails.docNo}</p>
-                                                    <p className='text-white/70'>{doc.clientDetails.company} - {doc.clientDetails.name}</p>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className='p-2 text-xs text-white/50'>No {title.toLowerCase()} found.</p>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })
                     )}
-                </nav>
+                    
+                    {/* Customer List (Ledger) */}
+                    {/* Only show customer list if viewing customers */}
+                    {sectionTitle === 'Customers' && (
+                        // REMOVED: overflow-y-auto flex-1, now handled by parent
+                        <div className="mt-8">
+                            <h3 className="text-sm font-bold uppercase text-white/70 mb-2">Customer List ({customerList.length})</h3>
+                            <div className='space-y-2'>
+                                {customerList.map(customer => (
+                                    <div
+                                        key={customer.id}
+                                        onClick={() => loadCustomerFromList(customer.id)}
+                                        // REPLACED hardcoded border color with inline style
+                                        className={`p-3 rounded-lg cursor-pointer transition border ${currentDoc.clientDetails.id === customer.id ? 'bg-white text-gray-800 border-white' : 'hover:bg-white/10 text-white border-white/40'}`}
+                                    >
+                                        <p className="text-sm font-semibold">{customer.name}</p>
+                                        <p className="text-xs text-white/70">{customer.company}</p>
+                                        <div className="flex justify-between items-center text-xs text-white/70 mt-1">
+                                            <span className={`py-0.5 px-2 rounded-full text-xs font-medium bg-gray-600 text-white`}>
+                                                {customer.id}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div> {/* END Main Scrollable Content Area */}
 
-                {/* Footer Controls */}
+
+                {/* Footer Controls (FIXED FOOTER) */}
                 <div className="mt-auto pt-4 border-t border-white/20 space-y-2">
                     {/* Display User ID */}
                     <div className="text-white/70 text-xs p-2 break-all bg-white/10 rounded-lg">
-                        <span className="font-semibold block mb-1">Current User ID:</span>
-                        {userId}
+                        <span className="font-semibold block mb-1">Current User ID:</span> {userId}
                     </div>
-
                     <button 
-                        onClick={() => setIsEditable(prev => !prev)} 
+                        onClick={() => setIsEditable(prev => !prev)}
                         onMouseEnter={() => setIsEditButtonHovered(true)} // ADDED: Set hover state to true
                         onMouseLeave={() => setIsEditButtonHovered(false)} // ADDED: Set hover state to false
-                        // UPDATED: Dynamic classes for background hover effect when active
-                        className={`w-full flex items-center p-2 text-sm font-medium rounded-lg transition duration-150 ${isEditable ? 'shadow-md hover:bg-gray-100' : ''}` // Added hover:bg-gray-100 for visual feedback when active
-                        }
-                        style={
-                            isEditable // Active State (Editing ENABLED)
-                            ? { 
-                                backgroundColor: 'white', 
-                                color: brandingSettings.primaryColor, 
-                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                            }
-                            // Inactive State (Editing DISABLED) - Handles hover to change text/bg color
-                            : { 
-                                backgroundColor: isEditButtonHovered ? 'white' : 'transparent', 
-                                color: isEditButtonHovered ? brandingSettings.primaryColor : 'white',
-                            }
-                        }
+                        className={`w-full flex items-center justify-center py-2 px-4 rounded-lg font-semibold transition duration-200 shadow-md text-sm ${isEditable ? 'bg-red-500 hover:bg-red-600 text-white' : 'text-white hover:bg-white/10'}`}
+                        // Dynamic styling for non-editing state
+                        style={!isEditable ? { 
+                            backgroundColor: isEditButtonHovered ? brandingSettings.accentColor : 'transparent', 
+                            borderWidth: '1px', 
+                            borderColor: 'white' 
+                        } : {}}
                     >
-                        <Edit size={16} className="mr-3" /> 
-                        {isEditable ? 'Editing ENABLED' : 'Editing DISABLED'}
+                        {isEditable ? (
+                            <> <X size={16} className="mr-2 hidden sm:block" /> Exit Edit Mode </>
+                        ) : (
+                            <> <Edit size={16} className="mr-2 hidden sm:block" /> Enter Edit Mode </>
+                        )}
                     </button>
-                    
                     <button 
-                        onClick={() => setIsBrandingSettingsOpen(true)} 
-                        className="w-full flex items-center p-2 mt-2 text-sm font-medium text-white rounded-lg hover:bg-white/20 transition duration-150"
+                        onClick={() => setIsBrandingSettingsOpen(true)}
+                        className="w-full flex items-center justify-center py-2 px-4 rounded-lg font-semibold transition text-white hover:bg-white/10 border border-white"
+                        style={{ backgroundColor: 'transparent' }}
                     >
-                        <Settings size={16} className="mr-3" /> Branding Settings
+                        <Settings size={16} className="mr-2 hidden sm:block" /> Branding
                     </button>
-                    
                     <button 
-                        onClick={handleLogout} 
-                        className="w-full flex items-center p-2 mt-2 text-sm font-medium text-white rounded-lg hover:bg-white/20 transition duration-150"
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center py-2 px-4 rounded-lg font-semibold transition text-white bg-red-600 hover:bg-red-700"
                     >
-                        <LogIn size={16} className="mr-3" /> Log Out
+                        <LogIn size={16} className="mr-2 hidden sm:block" /> Log Out
                     </button>
                 </div>
-            </div>
+            </nav>
 
-            {/* 2. MAIN CONTENT AREA */}
-            <main className="flex flex-col grow min-h-screen">
-                
-                {/* 3. TOOLBAR - UPDATED FOR RESPONSIVENESS */}
-                <div className="shrink-0 p-4 bg-white shadow-md flex justify-between items-center print:hidden">
-                    
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col overflow-y-auto">
+                {/* Header/Controls */}
+                <header className="flex-shrink-0 bg-white shadow-md p-4 flex flex-col md:flex-row justify-between items-center print:hidden space-y-2 md:space-y-0 md:space-x-4">
                     {/* Mobile Menu Button */}
-                    <button 
-                        onClick={() => setIsSidebarOpen(true)} 
-                        className="md:hidden text-gray-700 hover:text-gray-900 transition mr-4"
-                    >
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 mr-auto lg:hidden text-gray-600 hover:text-gray-800">
                         <Menu size={24} />
                     </button>
 
-                    {/* Left Section (Current Document Info) */}
-                    <div className='flex items-center space-x-4 flex-1 overflow-hidden'>
-                        {/* REPLACED hardcoded text color with inline style */}
-                        <h2 className="text-xl font-bold uppercase truncate" style={{ color: brandingSettings.primaryColor }}>
-                            {currentDoc.documentType} 
-                            <span className='font-normal text-gray-500 text-sm ml-2'>
-                                {currentDoc.documentDetails.docNo.includes('TEMP') ? '(Draft)' : currentDoc.documentDetails.docNo}
-                            </span>
-                        </h2>
-
-                        {/* Status Badge */}
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap hidden sm:block ${
-                            currentDoc.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                            currentDoc.status === 'Outstanding' ? 'bg-red-100 text-red-700' :
-                            currentDoc.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                        }`}>
-                            {currentDoc.status}
+                    {/* Left side: Current View Title */}
+                    <div className='flex items-center w-full md:w-auto'>
+                        <h1 className="text-xl font-bold text-gray-800">
+                            {sectionTitle === 'Customers' ? 'Customer Manager' : `${currentDoc.documentType} Editor`}
+                        </h1>
+                        <span className="ml-3 text-sm text-gray-500 font-medium hidden sm:inline-block">
+                            ({currentDoc.documentDetails.docNo})
                         </span>
                     </div>
 
-                    {/* Right Section (Actions) - Made responsive with hidden/show on small screens */}
-                    <div className="flex items-center space-x-2 shrink-0">
-
-                        {/* Save Button (Conditional) */}
-                        {isEditable && (
-                            <button 
-                                onClick={saveCurrentDocument}
-                                // REPLACED hardcoded background color with inline style
-                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md text-sm"
-                                style={{ backgroundColor: brandingSettings.primaryColor, hover: { opacity: 0.9 } }}
-                            >
-                                <Save size={16} className="mr-2 hidden sm:block" /> Save
-                            </button>
-                        )}
-
-                        {/* New Document Dropdown */}
-                        <div className="relative">
-                            <button 
-                                onClick={() => setIsDropdownOpen(prev => !prev)} 
-                                className="flex items-center text-gray-700 bg-gray-100 py-2 px-4 rounded-lg font-semibold transition hover:bg-gray-200 text-sm"
-                            >
-                                <Plus size={16} className="mr-2 hidden sm:block" /> New
-                                <ChevronDown size={16} className="ml-1" />
-                            </button>
-                            {isDropdownOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-1 z-30">
-                                    <button 
-                                        onClick={() => createNewDocument('Invoice')} 
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
-                                    >
-                                        <FileText size={16} className="inline mr-2" /> New Invoice
-                                    </button>
-                                    <button 
-                                        onClick={() => createNewDocument('Quotation')} 
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
-                                    >
-                                        <FileText size={16} className="inline mr-2" /> New Quotation
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                    {/* Right side: Action Buttons & Selector */}
+                    {/* MOBILE FRIENDLY CHANGE: Use flex-wrap and gap-2 to prevent overflow on small screens */}
+                    <div className="flex flex-wrap items-center justify-end w-full md:w-auto gap-2 md:gap-3">
                         
-                        {/* Approve Quotation Button (Conditional) */}
-                        {currentDoc.documentType === 'Quotation' && currentDoc.status === 'Pending' && (
+                        {/* Mark As Paid / Delete Button Group */}
+                        {isEditable && currentDoc.documentType !== 'Receipt' && (
                             <button 
-                                onClick={handleApproveQuotation} 
-                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-green-500 hover:bg-green-600 text-sm"
-                            >
-                                <Save size={16} className="mr-2 hidden sm:block" /> Approve
-                            </button>
-                        )}
-                        
-                        {/* Mark as Paid Button (Conditional) */}
-                        {currentDoc.documentType === 'Invoice' && currentDoc.status === 'Outstanding' && (
-                            <button 
-                                onClick={markAsPaid} 
-                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md bg-yellow-600 hover:bg-yellow-700 text-sm"
+                                onClick={markAsPaid}
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md text-sm bg-green-500 hover:bg-green-600"
                             >
                                 <DollarSign size={16} className="mr-2 hidden sm:block" /> Mark Paid
                             </button>
                         )}
+                        {isEditable && (
+                            <button 
+                                onClick={handleDeleteDocument}
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md text-sm bg-red-500 hover:bg-red-600"
+                            >
+                                <Trash2 size={16} className="mr-2 hidden sm:block" /> Delete
+                            </button>
+                        )}
 
+                        {/* Save Button */}
+                        {isEditable && (
+                            <button 
+                                onClick={handleSaveDocument}
+                                className="flex items-center text-white py-2 px-4 rounded-lg font-semibold transition shadow-md text-sm hover:opacity-90"
+                                style={{ backgroundColor: brandingSettings.primaryColor }}
+                            >
+                                <Save size={16} className="mr-2 hidden sm:block" /> Save Document
+                            </button>
+                        )}
 
                         {/* Print Button */}
                         <button 
-                            onClick={() => window.print()} 
-                            // REPLACED hardcoded styles with inline styles
-                            className="flex items-center py-2 px-4 rounded-lg font-semibold transition hover:opacity-90 text-sm"
-                            style={{ backgroundColor: brandingSettings.accentColor, color: brandingSettings.primaryColor }}
+                            onClick={() => window.print()}
+                            className="flex items-center text-gray-700 bg-gray-100 py-2 px-4 rounded-lg font-semibold hover:bg-gray-200 transition shadow-md text-sm"
                         >
-                            <FileText size={20} className="mr-1 sm:mr-2" /> 
-                            <span className="hidden sm:inline">Print</span>
+                            <Download size={16} className="mr-2 hidden sm:block" /> Print / PDF
                         </button>
-                        
-                        {/* Download/Upload Data Buttons */}
-                        <div className='flex space-x-2'>
+
+                        {/* Template Selector (NEW) */}
+                        <div className="relative text-sm">
+                            <select 
+                                value={currentDoc.templateStyle}
+                                onChange={(e) => handleTemplateStyleChange(e.target.value)}
+                                className="p-2 border border-gray-300 rounded-lg text-sm bg-white shadow-inner focus:ring-1 focus:border-1 appearance-none pr-8 cursor-pointer"
+                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
+                            >
+                                {TemplateOptions.map(option => (
+                                    <option key={option.id} value={option.id}>
+                                        Template: {option.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                        </div>
+                    </div>
+                </header>
+
+                {/* App Status and Data Controls */}
+                <div className="flex-shrink-0 bg-white border-b border-gray-200 p-3 flex justify-between items-center text-xs text-gray-600 print:hidden">
+                    <p>Current Document: <span className="font-semibold" style={{ color: brandingSettings.primaryColor }}>{currentDoc.documentType} - {currentDoc.documentDetails.docNo}</span></p>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                            {/* Backup Button */}
                             <button 
                                 title="Download Data Backup" 
-                                onClick={handleDownloadData} 
-                                className="p-2 text-gray-700 hover:text-green-600 bg-gray-100 rounded-full transition shadow-inner"
+                                onClick={handleDownloadData}
+                                className="flex items-center text-gray-700 bg-gray-100 py-1 px-2 rounded-md hover:bg-gray-200 transition"
                             >
-                                <Download size={20} />
+                                <Download size={14} className="mr-1" /> Backup
                             </button>
-                            
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                onChange={handleFileUpload} 
-                                className="hidden" 
-                                accept="application/json"
-                            />
+                            {/* Restore Button */}
                             <button 
-                                title="Upload Data Restore" 
-                                onClick={handleUploadClick} 
-                                className="p-2 text-gray-700 hover:text-red-600 bg-gray-100 rounded-full transition shadow-inner"
+                                title="Restore Data from Backup File" 
+                                onClick={() => fileInputRef.current.click()}
+                                className="flex items-center text-gray-700 bg-gray-100 py-1 px-2 rounded-md hover:bg-gray-200 transition"
                             >
-                            <Upload size={20} />
+                                <Upload size={14} className="mr-1" /> Restore
                             </button>
+                            <input type="file" ref={fileInputRef} onChange={handleRestoreData} className="hidden" accept="application/json" />
                         </div>
                     </div>
                 </div>
-                
-                {/* 7. TEMPLATE SECTION */}
-                {/* Reduced padding on mobile: p-8 -> p-4 sm:p-8 */}
-                <div className="p-4 sm:p-8 grow overflow-y-auto">
-                    {/* The DocumentTemplate component renders the chosen style */}
-                    <DocumentTemplate
-                        currentDoc={currentDoc}
-                        isEditable={isEditable}
-                        handleTemplateDetailChange={handleTemplateDetailChange}
-                        customerList={customerList}
-                        handleSelectCustomer={handleSelectCustomer}
-                        handleLineItemChange={handleLineItemChange}
-                        handleDeleteItem={handleDeleteItem}
-                        handleAddItem={handleAddItem}
-                        brandingSettings={brandingSettings} // PASS BRANDING SETTINGS
-                    />
+
+
+                {/* Document View */}
+                <div className="flex-1 p-4 sm:p-8 overflow-y-auto print:p-0 print:overflow-visible print:bg-white">
+                    {(() => {
+                        // Render the selected template based on currentDoc.templateStyle
+                        switch (currentDoc.templateStyle) {
+                            case 'StyleA':
+                            case 'StyleG': // Maps to StyleA (Structured)
+                            default:
+                                return (
+                                    <TemplateStyleA
+                                        currentDoc={currentDoc}
+                                        isEditable={isEditable}
+                                        handleTemplateDetailChange={handleTemplateDetailChange}
+                                        customerList={customerList}
+                                        handleSelectCustomer={loadCustomerFromList}
+                                        handleLineItemChange={handleLineItemChange}
+                                        handleDeleteItem={handleDeleteItem}
+                                        handleAddItem={handleAddItem}
+                                        brandingSettings={brandingSettings}
+                                    />
+                                );
+                            case 'StyleB':
+                            case 'StyleF': // Maps to StyleB (Minimal)
+                                return (
+                                    <TemplateStyleB
+                                        currentDoc={currentDoc}
+                                        isEditable={isEditable}
+                                        handleTemplateDetailChange={handleTemplateDetailChange}
+                                        customerList={customerList}
+                                        handleSelectCustomer={loadCustomerFromList}
+                                        handleLineItemChange={handleLineItemChange}
+                                        handleDeleteItem={handleDeleteItem}
+                                        handleAddItem={handleAddItem}
+                                        brandingSettings={brandingSettings}
+                                    />
+                                );
+                            case 'StyleC': // Monotone
+                                return (
+                                    <TemplateStyleC
+                                        currentDoc={currentDoc}
+                                        isEditable={isEditable}
+                                        handleTemplateDetailChange={handleTemplateDetailChange}
+                                        customerList={customerList}
+                                        handleSelectCustomer={loadCustomerFromList}
+                                        handleLineItemChange={handleLineItemChange}
+                                        handleDeleteItem={handleDeleteItem}
+                                        handleAddItem={handleAddItem}
+                                        brandingSettings={brandingSettings}
+                                    />
+                                );
+                            case 'StyleD': // Vibrant Left Bar
+                                return (
+                                    <TemplateStyleD
+                                        currentDoc={currentDoc}
+                                        isEditable={isEditable}
+                                        handleTemplateDetailChange={handleTemplateDetailChange}
+                                        customerList={customerList}
+                                        handleSelectCustomer={loadCustomerFromList}
+                                        handleLineItemChange={handleLineItemChange}
+                                        handleDeleteItem={handleDeleteItem}
+                                        handleAddItem={handleAddItem}
+                                        brandingSettings={brandingSettings}
+                                    />
+                                );
+                            case 'StyleE': // Solid Header Block
+                                return (
+                                    <TemplateStyleE
+                                        currentDoc={currentDoc}
+                                        isEditable={isEditable}
+                                        handleTemplateDetailChange={handleTemplateDetailChange}
+                                        customerList={customerList}
+                                        handleSelectCustomer={loadCustomerFromList}
+                                        handleLineItemChange={handleLineItemChange}
+                                        handleDeleteItem={handleDeleteItem}
+                                        handleAddItem={handleAddItem}
+                                        brandingSettings={brandingSettings}
+                                    />
+                                );
+                        }
+                    })()}
                 </div>
             </main>
         </div>
