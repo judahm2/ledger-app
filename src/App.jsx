@@ -526,7 +526,7 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                         <p className="text-xl font-bold" style={{ color: primaryColor }}>
                             {companyName.split(' ')[0]} <span style={{ color: accentColor }}>{companyName.split(' ').slice(1).join(' ')}</span>
                         </p>
-                        <p className="text-xs mt-1">{companyInfo.address}</p>
+                        <p className="text-xs mt-1">Adress: {companyInfo.address}</p>
                         <p className="text-xs">Phone: {companyInfo.phone}</p>
                         <p className="text-xs">Email: {companyInfo.email}</p>
                         <p className="text-xs">Vat No. {companyInfo.vatNo}</p>
@@ -639,8 +639,8 @@ const TemplateStyleA = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                     <EditableFooterInput label="Email" section="brandingSettings.contactDetails" key="contactEmail" value={contactDetails.contactEmail} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
                     
                     <div className='mt-4'>
-                        <h3 className="text-sm font-bold mb-2 uppercase" style={{ color: primaryColor }}>Thank You Note</h3>
-                        <EditableFooterInput label="Note" section="brandingSettings.contactDetails" key="thankYouNote" value={contactDetails.thankYouNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} />
+                        
+                        <EditableFooterInput label="Note" section="brandingSettings.contactDetails" key="thankYouNote" value={contactDetails.thankYouNote} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={primaryColor} style={{ color: primaryColor }}  />
                     </div>
                 </div>
             </div>
@@ -1005,7 +1005,7 @@ const TemplateStyleC = ({ currentDoc, isEditable, handleTemplateDetailChange, cu
                 </div>
                 
                 <div className="text-left sm:text-right">
-                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-900">Contact Details</h3>
+                    <h3 className="text-sm font-bold mb-2 uppercase text-gray-900">Contact Person Details</h3>
                     <EditableFooterInput label="Contact" section="brandingSettings.contactDetails" key="contactName" value={contactDetails.contactName} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
                     <EditableFooterInput label="Phone" section="brandingSettings.contactDetails" key="contactPhone" value={contactDetails.contactPhone} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
                     <EditableFooterInput label="Email" section="brandingSettings.contactDetails" key="contactEmail" value={contactDetails.contactEmail} isEditable={isEditable} handleTemplateDetailChange={handleTemplateDetailChange} primaryColor={'#000'} />
@@ -1337,17 +1337,56 @@ const BrandingSettingsModal = ({ isOpen, onClose, brandingSettings, handleBrandi
                                 style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
                             />
                         </div>
-                        {/* Company VAT No */}
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">VAT Number:</label>
-                            <input 
-                                type="text" 
-                                value={brandingSettings.companyInfo.vatNo} 
-                                onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'vatNo', e.target.value)} 
-                                className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-1 focus:border-1"
-                                style={{ focusRingColor: brandingSettings.primaryColor, focusBorderColor: brandingSettings.primaryColor }}
-                            />
+
+                        {/* Company Office Address */}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Office Address</label>
+                                <input 
+                                    type="text" 
+                                    value={brandingSettings.companyInfo.address}
+                                    onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'address', e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                />
+                            </div>
+
+                           {/* Company Phone Number */}
+
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone Number</label>
+                                <input 
+                                    type="text" 
+                                    value={brandingSettings.companyInfo.phone}
+                                    onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'phone', e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                />
+                            </div>
+
+                            {/* Company  Email */}
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Company Email</label>
+                                <input 
+                                    type="email" 
+                                    value={brandingSettings.companyInfo.email}
+                                    onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'email', e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                />
+                            </div>
+
+                            {/* Company VAT No */}
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">VAT Number</label>
+                                <input 
+                                    type="text" 
+                                    value={brandingSettings.companyInfo.vatNo}
+                                    onChange={(e) => handleTemplateDetailChange('brandingSettings.companyInfo', 'vatNo', e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                />
+                            </div>
                         </div>
+
+
                     </div>
                     
                     {/* 2. Logo Upload */}
@@ -1588,6 +1627,14 @@ const App = () => {
             }
             return newSettings;
         });
+
+        // Handler for changes within Branding Settings (for the dedicated settings panel)
+    const handleBrandingChange = (key, value) => {
+        setBrandingSettings(prev => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
         
         // FIX: If the default template style is changed, update the current document immediately
         // to reflect the change without a refresh.
